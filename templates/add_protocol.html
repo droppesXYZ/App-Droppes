@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Add Protocol - Crypto Airdrop Manager{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Botão de Voltar -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <button onclick="history.back()" class="btn btn-outline-secondary btn-back">
+                <i class="fas fa-arrow-left me-2"></i>Back
+            </button>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <!-- Header -->
+            <div class="mb-4">
+                <h1 class="display-6 mb-1">
+                    <i class="fas fa-plus-circle me-2 text-info"></i>
+                    Add New Protocol
+                </h1>
+                <p class="text-muted">Add a new airdrop protocol to track your farming progress</p>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card border-secondary">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-form me-2"></i>
+                        Protocol Information
+                    </h5>
+                </div>
+                
+                <div class="card-body">
+                    <form method="POST" id="protocolForm">
+                        <!-- Protocol Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">
+                                <i class="fas fa-tag me-1"></i>
+                                Protocol Name *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="name" 
+                                   name="name" 
+                                   required 
+                                   placeholder="e.g., LayerZero, Starknet, zkSync">
+                            <div class="form-text">The name of the airdrop protocol</div>
+                        </div>
+
+                        <!-- Network -->
+                        <div class="mb-3">
+                            <label for="network" class="form-label">
+                                <i class="fas fa-network-wired me-1"></i>
+                                Network *
+                            </label>
+                            <select class="form-select" id="network" name="network" required>
+                                <option value="">Select a network...</option>
+                                <option value="Ethereum">Ethereum</option>
+                                <option value="Arbitrum">Arbitrum</option>
+                                <option value="Optimism">Optimism</option>
+                                <option value="Polygon">Polygon</option>
+                                <option value="BSC">Binance Smart Chain</option>
+                                <option value="Avalanche">Avalanche</option>
+                                <option value="Fantom">Fantom</option>
+                                <option value="Solana">Solana</option>
+                                <option value="Cosmos">Cosmos</option>
+                                <option value="Polkadot">Polkadot</option>
+                                <option value="Near">Near Protocol</option>
+                                <option value="Aptos">Aptos</option>
+                                <option value="Sui">Sui</option>
+                                <option value="StarkNet">StarkNet</option>
+                                <option value="zkSync">zkSync</option>
+                                <option value="Linea">Linea</option>
+                                <option value="Base">Base</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="form-text">The blockchain network this protocol runs on</div>
+                        </div>
+
+                        <!-- Official Website -->
+                        <div class="mb-3">
+                            <label for="website" class="form-label">
+                                <i class="fas fa-globe me-1"></i>
+                                Official Website
+                            </label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="website" 
+                                   name="website" 
+                                   placeholder="https://protocol.com">
+                            <div class="form-text">The official website URL</div>
+                        </div>
+
+                        <!-- Twitter Handle -->
+                        <div class="mb-3">
+                            <label for="twitter" class="form-label">
+                                <i class="fab fa-twitter me-1"></i>
+                                Twitter Handle
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">@</span>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="twitter" 
+                                       name="twitter" 
+                                       placeholder="protocolname">
+                            </div>
+                            <div class="form-text">Official Twitter/X handle (without @)</div>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                Farming Start Date
+                            </label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="start_date" 
+                                   name="start_date">
+                            <div class="form-text">When you started farming this protocol</div>
+                        </div>
+
+                        <!-- Daily Missions -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="daily_missions" 
+                                       name="daily_missions">
+                                <label class="form-check-label" for="daily_missions">
+                                    <i class="fas fa-tasks me-1"></i>
+                                    This protocol has daily missions
+                                </label>
+                            </div>
+                            <div class="form-text">Check if this protocol requires daily interactions</div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-save me-2"></i>
+                                Add Protocol
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card border-secondary mt-4">
+                <div class="card-header bg-dark border-secondary">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0 small text-muted">
+                        <li>Fill in as much information as possible for better tracking</li>
+                        <li>The start date helps you track how long you've been farming</li>
+                        <li>Mark protocols with daily missions to stay organized</li>
+                        <li>Website and Twitter links will be clickable in the protocol list</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as default for start date
+    const startDateInput = document.getElementById('start_date');
+    if (startDateInput && !startDateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.value = today;
+    }
+
+    // Form validation
+    const form = document.getElementById('protocolForm');
+    form.addEventListener('submit', function(event) {
+        const name = document.getElementById('name').value.trim();
+        const network = document.getElementById('network').value;
+        
+        if (!name) {
+            event.preventDefault();
+            alert('Protocol name is required!');
+            document.getElementById('name').focus();
+            return;
+        }
+        
+        if (!network) {
+            event.preventDefault();
+            alert('Please select a network!');
+            document.getElementById('network').focus();
+            return;
+        }
+        
+        // Clean up Twitter handle
+        const twitterInput = document.getElementById('twitter');
+        let twitterValue = twitterInput.value.trim();
+        if (twitterValue.startsWith('@')) {
+            twitterInput.value = twitterValue.substring(1);
+        }
+    });
+
+    // Network select enhancement
+    const networkSelect = document.getElementById('network');
+    networkSelect.addEventListener('change', function() {
+        if (this.value === 'Other') {
+            const customNetwork = prompt('Enter the custom network name:');
+            if (customNetwork && customNetwork.trim()) {
+                // Create new option
+                const option = new Option(customNetwork.trim(), customNetwork.trim());
+                this.add(option);
+                this.value = customNetwork.trim();
+            } else {
+                this.value = '';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

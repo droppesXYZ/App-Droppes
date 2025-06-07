@@ -1,0 +1,458 @@
+/* Custom styles for Crypto Airdrop Manager */
+
+:root {
+    --crypto-gold: #f7931a;
+    --crypto-blue: #627eea;
+    --crypto-green: #00d4aa;
+    --accent-purple: #8b5cf6;
+}
+
+/* Body and general layout */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-dark);
+}
+
+/* Navigation enhancements */
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.navbar-brand i {
+    color: var(--crypto-gold);
+}
+
+/* Card enhancements */
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: var(--bs-dark);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.card-title {
+    color: var(--bs-light);
+    font-weight: 600;
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.badge.bg-info {
+    background-color: var(--crypto-blue) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--crypto-gold) !important;
+}
+
+/* Button enhancements */
+.btn-info {
+    background-color: var(--crypto-blue);
+    border-color: var(--crypto-blue);
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #4f6bd8;
+    border-color: #4f6bd8;
+}
+
+.btn-outline-info {
+    color: var(--crypto-blue);
+    border-color: var(--crypto-blue);
+}
+
+.btn-outline-info:hover {
+    background-color: var(--crypto-blue);
+    border-color: var(--crypto-blue);
+}
+
+/* Form enhancements */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--crypto-blue);
+    box-shadow: 0 0 0 0.2rem rgba(98, 126, 234, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: var(--crypto-blue);
+    border-color: var(--crypto-blue);
+}
+
+/* Icon styling */
+.text-info {
+    color: var(--crypto-blue) !important;
+}
+
+.text-warning {
+    color: var(--crypto-gold) !important;
+}
+
+.fa-coins {
+    color: var(--crypto-gold);
+}
+
+.fa-rocket {
+    color: var(--crypto-blue);
+}
+
+.fa-calendar-check {
+    font-size: 1.1rem;
+}
+
+/* External link styling */
+.btn .fa-external-link-alt {
+    opacity: 0.7;
+    font-size: 0.8em;
+}
+
+/* Alert enhancements */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.alert-success {
+    background-color: rgba(0, 212, 170, 0.15);
+    color: var(--crypto-green);
+    border-left: 4px solid var(--crypto-green);
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: #dc3545;
+    border-left: 4px solid #dc3545;
+}
+
+/* Empty state styling */
+.text-center .fa-4x {
+    opacity: 0.3;
+}
+
+/* Footer styling */
+footer {
+    margin-top: auto;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .display-6 {
+        font-size: 1.75rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Animation for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Gradient backgrounds for special elements */
+.bg-gradient-crypto {
+    background: linear-gradient(135deg, var(--crypto-blue), var(--accent-purple));
+}
+
+/* Loading states */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Form validation states */
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.is-valid {
+    border-color: var(--crypto-green);
+}
+
+/* Typography enhancements */
+.display-6 {
+    font-weight: 600;
+    color: var(--bs-light);
+}
+
+h5.card-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Input group styling */
+.input-group-text {
+    background-color: var(--bs-secondary);
+    border-color: var(--bs-border-color);
+    color: var(--bs-light);
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bs-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bs-secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-light);
+}
+
+/* Botão de Voltar - Estilo personalizado */
+.btn-back {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    font-weight: 500;
+    border: 1px solid rgba(108, 117, 125, 0.5);
+}
+
+.btn-back:hover {
+    background-color: var(--bs-secondary);
+    border-color: var(--bs-secondary);
+    color: var(--bs-light);
+    transform: translateX(-2px);
+}
+
+.btn-back:focus {
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.btn-back i {
+    transition: transform 0.3s ease;
+}
+
+.btn-back:hover i {
+    transform: translateX(-2px);
+}
+
+/* Login page specific styles */
+.login-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+}
+
+.login-card {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.login-card .card-body {
+    padding: 3rem;
+}
+
+.login-logo {
+    background: linear-gradient(45deg, var(--crypto-gold), var(--crypto-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+.login-title {
+    color: var(--bs-light);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+    color: var(--bs-secondary);
+    margin-bottom: 2rem;
+}
+
+.login-form .form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--bs-light);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+}
+
+.login-form .form-control:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--crypto-blue);
+    box-shadow: 0 0 0 0.2rem rgba(98, 126, 234, 0.25);
+    color: var(--bs-light);
+}
+
+.login-form .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.login-form .form-label {
+    color: var(--bs-light);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.login-btn {
+    background: linear-gradient(45deg, var(--crypto-blue), var(--accent-purple));
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(98, 126, 234, 0.4);
+}
+
+.login-footer {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+}
+
+.demo-credentials {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.demo-credentials small {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.password-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--bs-light);
+}
+
+.password-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--bs-light);
+}
+
+/* Remember me checkbox */
+.form-check-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.form-check-input:checked {
+    background-color: var(--crypto-blue);
+    border-color: var(--crypto-blue);
+}
+
+.form-check-label {
+    color: var(--bs-light);
+}
+
+/* Social Login Styles */
+.social-login {
+    margin: 2rem 0;
+}
+
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.divider span {
+    background: var(--bs-dark);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-twitter {
+    background: #1da1f2;
+    border: 1px solid #1da1f2;
+    color: white;
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.btn-twitter:hover {
+    background: #1a91da;
+    border-color: #1a91da;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(29, 161, 242, 0.4);
+    text-decoration: none;
+}
+
+.btn-twitter:focus {
+    box-shadow: 0 0 0 0.2rem rgba(29, 161, 242, 0.25);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-twitter:active {
+    background: #1681c7;
+    border-color: #1681c7;
+    color: white;
+    text-decoration: none;
+}
+
+/* Responsive login design */
+@media (max-width: 768px) {
+    .login-card .card-body {
+        padding: 2rem 1.5rem;
+    }
+    
+    .login-logo {
+        font-size: 2.5rem;
+    }
+}

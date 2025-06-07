@@ -1,0 +1,220 @@
+{% extends "login_base.html" %}
+
+{% block title %}Login - Crypto Airdrop Manager{% endblock %}
+
+{% block content %}
+<div class="login-container d-flex align-items-center justify-content-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-6 col-sm-8">
+                <!-- Login Card -->
+                <div class="login-card card shadow-lg border-0">
+                    <div class="card-body">
+                        <!-- Logo/Header -->
+                        <div class="text-center mb-4">
+                            <i class="fas fa-coins login-logo"></i>
+                                                    <h2 class="login-title" id="formTitle">Welcome Back</h2>
+                        <p class="login-subtitle" id="formSubtitle">Sign in to your account</p>
+                        </div>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                                                <!-- Login/Register Forms -->
+                        <div id="loginForm">
+                            <form method="POST" action="{{ url_for('login') }}" class="login-form">
+                                <input type="hidden" name="action" value="login">
+                                <div class="mb-4">
+                                    <label for="username" class="form-label">
+                                        <i class="fas fa-user me-2"></i>Username
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg" id="username" name="username" required 
+                                           placeholder="Enter your username" autocomplete="username">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="password" class="form-label">
+                                        <i class="fas fa-lock me-2"></i>Password
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control form-control-lg" id="password" name="password" required 
+                                               placeholder="Enter your password" autocomplete="current-password">
+                                        <button type="button" class="btn password-toggle" onclick="togglePassword()">
+                                            <i class="fas fa-eye" id="toggleIcon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4 form-check">
+                                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                    <label class="form-check-label" for="remember">
+                                        Remember me
+                                    </label>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn login-btn btn-lg">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Register Form (Hidden by default) -->
+                        <div id="registerForm" style="display: none;">
+                            <form method="POST" action="{{ url_for('login') }}" class="login-form">
+                                <input type="hidden" name="action" value="register">
+                                <div class="mb-3">
+                                    <label for="reg_username" class="form-label">
+                                        <i class="fas fa-user me-2"></i>Username
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg" id="reg_username" name="username" required 
+                                           placeholder="Choose a username" autocomplete="username">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="reg_email" class="form-label">
+                                        <i class="fas fa-envelope me-2"></i>Email
+                                    </label>
+                                    <input type="email" class="form-control form-control-lg" id="reg_email" name="email" required 
+                                           placeholder="Enter your email" autocomplete="email">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="reg_password" class="form-label">
+                                        <i class="fas fa-lock me-2"></i>Password
+                                    </label>
+                                    <input type="password" class="form-control form-control-lg" id="reg_password" name="password" required 
+                                           placeholder="Create a password" autocomplete="new-password" minlength="6">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="confirm_password" class="form-label">
+                                        <i class="fas fa-lock me-2"></i>Confirm Password
+                                    </label>
+                                    <input type="password" class="form-control form-control-lg" id="confirm_password" name="confirm_password" required 
+                                           placeholder="Confirm your password" autocomplete="new-password" minlength="6">
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn login-btn btn-lg">
+                                        <i class="fas fa-user-plus me-2"></i>Create Account
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Social Login -->
+                        <div class="social-login mt-4">
+                            <div class="divider">
+                                <span>ou</span>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <a href="{{ url_for('twitter_login') }}" class="btn btn-twitter btn-lg">
+                                    <i class="fab fa-twitter me-2"></i>Continue with Twitter
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Toggle Forms -->
+                        <div class="text-center mt-4">
+                            <div id="loginToggle">
+                                <small class="text-muted">
+                                    Don't have an account? 
+                                    <a href="#" onclick="showRegisterForm()" class="text-decoration-none">
+                                        <strong>Sign up here</strong>
+                                    </a>
+                                </small>
+                            </div>
+                            <div id="registerToggle" style="display: none;">
+                                <small class="text-muted">
+                                    Already have an account? 
+                                    <a href="#" onclick="showLoginForm()" class="text-decoration-none">
+                                        <strong>Sign in here</strong>
+                                    </a>
+                                </small>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+                <!-- Footer -->
+                <div class="text-center mt-4">
+                    <small class="login-footer">
+                        © 2024 Crypto Airdrop Manager. Secure & Modern Portfolio Tracking.
+                    </small>
+                </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+function showRegisterForm() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('loginToggle').style.display = 'none';
+    document.getElementById('registerToggle').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Create Account';
+    document.getElementById('formSubtitle').textContent = 'Join us today';
+    document.getElementById('reg_username').focus();
+}
+
+function showLoginForm() {
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerToggle').style.display = 'none';
+    document.getElementById('loginToggle').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Welcome Back';
+    document.getElementById('formSubtitle').textContent = 'Sign in to your account';
+    document.getElementById('username').focus();
+}
+
+// Password confirmation validation
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('username').focus();
+    
+    const regPassword = document.getElementById('reg_password');
+    const confirmPassword = document.getElementById('confirm_password');
+    
+    function validatePasswords() {
+        if (regPassword.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    }
+    
+    if (regPassword && confirmPassword) {
+        regPassword.addEventListener('input', validatePasswords);
+        confirmPassword.addEventListener('input', validatePasswords);
+    }
+});
+</script>
+
+
+{% endblock %} 
