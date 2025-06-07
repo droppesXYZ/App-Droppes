@@ -5,7 +5,8 @@ from datetime import datetime, date
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
 from authlib.integrations.flask_client import OAuth
-from models import db, User, Protocol, Investment, Task, Airdrop, InvestmentType, TaskStatus, ProtocolStatus, AirdropStatus
+from models import db, User, Protocol, Investment, Task, Airdrop, Tweet, InvestmentType, TaskStatus, ProtocolStatus, AirdropStatus
+from twitter_service import TwitterService
 
 # Carregar variáveis de ambiente do arquivo .env se existir
 try:
@@ -1002,6 +1003,63 @@ def delete_airdrop(airdrop_id):
         logging.error(f"Error deleting airdrop: {str(e)}")
         flash('An error occurred while deleting the airdrop.', 'error')
         return redirect(url_for('index'))
+
+
+@app.route('/protocol/<int:protocol_id>/update_tweets', methods=['POST'])
+@login_required
+def update_protocol_tweets(protocol_id):
+    """Atualizar tweets de um protocolo específico"""
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return redirect(url_for('login'))
+        
+        protocol = Protocol.query.get_or_404(protocol_id)
+        
+        # Check permission
+        if protocol.user_id != current_user.id:
+            flash('You do not have permission to update tweets for this protocol.', 'error')
+            return redirect(url_for('index'))
+        
+        if not protocol.twitter:
+            flash('Este protocolo não tem Twitter configurado.', 'warning')
+            return redirect(url_for('protocol_details', protocol_id=protocol_id))
+        
+        # Atualizar tweets
+        twitter_service = TwitterService()
+        success = twitter_service.update_protocol_tweets(protocol_id)
+        
+        if success:
+            flash('Tweets atualizados com sucesso!', 'success')
+        else:
+            flash('Erro ao atualizar tweets. Verifique o Bearer Token ou o username do Twitter.', 'error')
+        
+    except Exception as e:
+        logging.error(f"Error updating tweets: {str(e)}")
+        flash('Erro ao atualizar tweets.', 'error')
+    
+    return redirect(url_for('protocol_details', protocol_id=protocol_id))
+
+
+@app.route('/admin/update_all_tweets', methods=['POST'])
+@login_required
+def update_all_tweets():
+    """Atualizar tweets de todos os protocolos (admin only)"""
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return redirect(url_for('login'))
+        
+        twitter_service = TwitterService()
+        result = twitter_service.update_all_protocols_tweets()
+        
+        flash(f'Atualização concluída: {result["updated"]} sucessos, {result["failed"]} falhas de {result["total"]} protocolos.', 'info')
+        
+    except Exception as e:
+        logging.error(f"Error updating all tweets: {str(e)}")
+        flash('Erro ao atualizar todos os tweets.', 'error')
+    
+    return redirect(url_for('index'))
 
 def safe_string(value):
     """Safely convert value to string, handling encoding issues"""

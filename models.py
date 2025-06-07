@@ -123,6 +123,7 @@ class Protocol(db.Model):
     investments = db.relationship('Investment', backref='protocol', lazy=True, cascade='all, delete-orphan')
     tasks = db.relationship('Task', backref='protocol', lazy=True, cascade='all, delete-orphan')
     airdrops = db.relationship('Airdrop', backref='protocol', lazy=True, cascade='all, delete-orphan')
+    tweets = db.relationship('Tweet', backref='protocol', lazy=True, cascade='all, delete-orphan')
     
     def get_total_investment(self):
         """Calculate total current investment (entries - withdrawals)"""
@@ -214,4 +215,27 @@ class Airdrop(db.Model):
         self.status = AirdropStatus.SOLD
         self.price_per_token = price_per_token
         self.sold_date = sold_date or datetime.utcnow().date()
+
+
+class Tweet(db.Model):
+    __tablename__ = 'tweets'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    protocol_id = db.Column(db.Integer, db.ForeignKey('protocols.id'), nullable=False)
+    tweet_id = db.Column(db.String(50), nullable=False)  # ID único do Twitter
+    text = db.Column(db.Text, nullable=False)
+    author_username = db.Column(db.String(50), nullable=False)
+    created_at_twitter = db.Column(db.DateTime, nullable=False)  # Data de criação no Twitter
+    tweet_url = db.Column(db.String(300), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Data de inserção no nosso banco
+    
+    # Constraint para evitar tweets duplicados
+    __table_args__ = (db.UniqueConstraint('protocol_id', 'tweet_id', name='unique_protocol_tweet'),)
+    
+    @property
+    def short_text(self):
+        """Return truncated text for display"""
+        if len(self.text) > 100:
+            return self.text[:100] + "..."
+        return self.text
 
