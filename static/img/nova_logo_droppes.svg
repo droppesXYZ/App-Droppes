@@ -1,0 +1,38 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo de fundo -->
+  <circle cx="60" cy="60" r="58" fill="none" stroke="#4A90E2" stroke-width="2" opacity="0.3"/>
+  
+  <!-- Gota d'água principal -->
+  <path d="M60 25 
+           C60 25 35 45 35 65 
+           C35 77.5 46.5 88 60 88 
+           C73.5 88 85 77.5 85 65 
+           C85 45 60 25 60 25 Z" 
+           fill="url(#dropGradient)"/>
+  
+  <!-- Highlight/brilho na gota -->
+  <path d="M60 32
+           C60 32 45 48 45 62
+           C45 68 49 73 54 75
+           C56 76 58 76 60 75
+           C55 70 52 65 52 58
+           C52 50 60 32 60 32 Z" 
+           fill="url(#highlightGradient)" 
+           opacity="0.4"/>
+  
+  <!-- Definições de gradientes -->
+  <defs>
+    <!-- Gradiente principal da gota -->
+    <linearGradient id="dropGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1DB8CC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0FA8BA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0A9DB0;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradiente do highlight -->
+    <linearGradient id="highlightGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0.2" />
+    </linearGradient>
+  </defs>
+</svg> 

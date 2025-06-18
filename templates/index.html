@@ -1,19 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Protocols - Crypto Airdrop Manager{% endblock %}
+{% block title %}Protocols - Droppes{% endblock %}
 
 {% block content %}
 <div class="container my-4">
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
+            <!-- Droppes Brand Header -->
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='img/nova_logo_droppes.svg') }}" alt="Droppes Logo" style="height: 120px; width: auto;">
+            </div>
+            
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h1 class="display-6 mb-1">
-                        <i class="fas fa-rocket me-2 text-info"></i>
+                        <i class="fas fa-tint me-2 text-info"></i>
                         Airdrop Protocols
                     </h1>
-                    <p class="text-muted mb-0">Manage and track your crypto airdrop farming protocols</p>
+                    <p class="text-muted mb-0">For those who farm seriously - Track your protocols like a pro</p>
                 </div>
                 <a href="{{ url_for('add_protocol') }}" class="btn btn-info">
                     <i class="fas fa-plus me-2"></i>
@@ -58,187 +63,206 @@
     {% if protocols %}
         <div class="row g-4">
             {% for protocol in protocols %}
-                <div class="col-lg-6 col-xl-4">
-                    <div class="card h-100 border-secondary">
-                        <div class="card-header bg-dark border-secondary">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h5 class="card-title mb-1">{{ protocol.name }}</h5>
-                                    <div class="mb-2">
-                                        <span class="badge bg-info">{{ protocol.network }}</span>
-                                        {% if protocol.status %}
-                                            <span class="badge {{ 'bg-success' if protocol.status.value == 'ativo' else 'bg-danger' }}">
-                                                {{ protocol.status.value.title() }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% if protocol.daily_missions %}
-                                    <div class="text-warning" title="Daily missions available">
-                                        <i class="fas fa-calendar-check"></i>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="card-body">
-                            <!-- Start Date -->
-                            {% if protocol.start_date %}
-                                <div class="mb-3">
-                                    <small class="text-muted">
-                                        <i class="fas fa-calendar-alt me-1"></i>
-                                        Started: {{ protocol.start_date }}
-                                    </small>
-                                </div>
-                            {% endif %}
-
-                            <!-- Investment Summary -->
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted small">Total Investment:</span>
-                                    <span class="badge bg-success">${{ "%.2f"|format(protocol.get_total_investment()) }}</span>
-                                </div>
-                            </div>
-
-                            <!-- Airdrop Summary -->
-                            {% set airdrop_value = protocol.get_total_airdrop_value() %}
-                            {% if airdrop_value > 0 %}
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted small">
-                                            <i class="fas fa-gift me-1"></i>
-                                            Airdrop Value:
-                                        </span>
-                                        <span class="badge bg-warning text-dark">${{ "%.2f"|format(airdrop_value) }}</span>
-                                    </div>
-                                </div>
-                            {% elif protocol.airdrops %}
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted small">
-                                            <i class="fas fa-gift me-1"></i>
-                                            Airdrops:
-                                        </span>
-                                        <span class="badge bg-info">{{ protocol.airdrops|length }} pending</span>
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            <!-- Task Summary -->
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted small">Tasks:</span>
-                                    <div>
-                                        <span class="badge bg-warning text-dark">{{ protocol.get_pending_tasks_count() }} pending</span>
-                                        <span class="badge bg-success">{{ protocol.get_completed_tasks_count() }} done</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Daily Missions Badge -->
-                            {% if protocol.daily_missions %}
-                                <div class="mb-3">
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="fas fa-tasks me-1"></i>
-                                        Daily Missions
-                                    </span>
-                                </div>
-                            {% endif %}
-
-                            <!-- Quick Actions -->
-                            <div class="mb-3">
-                                <div class="btn-group w-100" role="group">
-                                    <button type="button" class="btn btn-outline-success btn-sm" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#investmentModal{{ protocol.id }}">
-                                        <i class="fas fa-dollar-sign me-1"></i>
-                                        Add Investment
-                                    </button>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#taskModal{{ protocol.id }}">
-                                        <i class="fas fa-plus me-1"></i>
-                                        Add Task
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Recent Tasks -->
-                            {% if protocol.tasks %}
-                                <div class="mb-3">
-                                    <small class="text-muted">Recent Tasks:</small>
-                                    <div class="mt-2">
-                                        {% for task in protocol.tasks[:3] %}
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <small class="text-truncate me-2" style="max-width: 60%;">{{ task.title }}</small>
-                                                <div>
-                                                    <form style="display: inline;" method="POST" action="{{ url_for('toggle_task', task_id=task.id) }}">
-                                                        <button type="submit" class="btn btn-sm p-0 border-0" 
-                                                                style="background: none; color: {{ 'var(--bs-success)' if task.status.value == 'concluida' else 'var(--bs-secondary)' }};">
-                                                            <i class="fas fa-{{ 'check-circle' if task.status.value == 'concluida' else 'circle' }}"></i>
-                                                        </button>
-                                                    </form>
-                                                    <form style="display: inline;" method="POST" action="{{ url_for('delete_task', task_id=task.id) }}">
-                                                        <button type="submit" class="btn btn-sm p-0 border-0 ms-1" 
-                                                                style="background: none; color: var(--bs-danger);"
-                                                                onclick="return confirm('Delete this task?')">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
+                <div class="col-md-6 col-lg-4">
+                    <!-- Protocol Card -->
+                    <div class="card border-secondary protocol-card" style="{{ protocol.get_card_style() }}">
+                        <div class="card-body p-4">
+                            <!-- Header Row -->
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="flex-grow-1 d-flex align-items-center">
+                                    <a href="{{ url_for('protocol_details', protocol_id=protocol.id) }}" class="text-decoration-none d-flex align-items-center flex-grow-1">
+                                        {% if protocol.logo_url %}
+                                            <img src="{{ protocol.logo_url }}" alt="{{ protocol.name }}" 
+                                                 class="protocol-logo me-2" 
+                                                 style="width: 24px; height: 24px; border-radius: 4px; object-fit: cover; flex-shrink: 0;"
+                                                 onerror="this.src='{{ protocol.get_google_favicon() }}'; this.onerror=null;">
+                                        {% elif protocol.website %}
+                                            <img src="{{ protocol.get_google_favicon() }}" alt="{{ protocol.name }}" 
+                                                 class="protocol-logo me-2" 
+                                                 style="width: 24px; height: 24px; border-radius: 4px; object-fit: cover; flex-shrink: 0;"
+                                                 onerror="this.src='{{ protocol.get_letter_avatar() }}'; this.onerror=null;">
+                                        {% else %}
+                                            <div class="protocol-logo me-2 d-flex align-items-center justify-content-center" 
+                                                 style="width: 24px; height: 24px; border-radius: 4px; background-color: {{ protocol.get_network_color() }}; color: white; font-size: 12px; font-weight: bold;">
+                                                {{ protocol.name[0].upper() }}
                                             </div>
-                                        {% endfor %}
+                                        {% endif %}
+                                        
+                                        <h6 class="card-title mb-0 fw-bold text-white">{{ protocol.name }}</h6>
+                                    </a>
+                                </div>
+                                
+                                <!-- Right side: Badges + Dropdown -->
+                                <div class="d-flex align-items-center gap-2">
+                                    <!-- Network Badge with Icon Only -->
+                                    <span class="network-badge {{ protocol.get_network_css_class() }}" title="{{ protocol.network }}">
+                                        <i class="{{ protocol.get_network_icon() }}"></i>
+                                    </span>
+                                    
+                                    <!-- Status Badge with Icon -->
+                                    {% if protocol.status %}
+                                        <span class="status-badge {{ 'status-active' if protocol.status.value == 'active' else 'status-ended' }}">
+                                            <i class="fas fa-{{ 'check-circle' if protocol.status.value == 'active' else 'times-circle' }} me-1"></i>
+                                            {{ protocol.status.value.title() }}
+                                        </span>
+                                    {% endif %}
+                                    
+                                    <!-- Daily Missions Badge -->
+                                    {% if protocol.daily_missions %}
+                                        <span class="daily-missions-badge" title="Daily Missions Required">
+                                            <i class="fas fa-calendar-check me-1"></i>
+                                            Daily
+                                        </span>
+                                    {% endif %}
+                                    
+                                    <!-- Dropdown Menu -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="{{ url_for('edit_protocol', protocol_id=protocol.id) }}">
+                                                <i class="fas fa-edit me-2"></i>Edit
+                                            </a></li>
+                                            <li><a class="dropdown-item text-danger" href="{{ url_for('delete_protocol', protocol_id=protocol.id) }}" 
+                                                   onclick="return confirm('Are you sure?')">
+                                                <i class="fas fa-trash me-2"></i>Delete
+                                            </a></li>
+                                        </ul>
                                     </div>
                                 </div>
-                            {% endif %}
+                            </div>
 
-                            <!-- View Details Button -->
-                            <div class="mb-3">
-                                <a href="{{ url_for('protocol_details', protocol_id=protocol.id) }}" class="btn btn-outline-primary btn-sm w-100">
-                                    <i class="fas fa-eye me-1"></i>
-                                    View Details & Transactions
+                            <!-- Summary Stats -->
+                            <div class="row text-center mb-3">
+                                <div class="col-4">
+                                    <div class="border-end">
+                                        <small class="text-muted d-block">Investment</small>
+                                        <strong class="text-success">${{ "%.0f"|format(protocol.get_total_investment()) }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="border-end">
+                                        <small class="text-muted d-block">Tasks</small>
+                                        <strong>{{ protocol.get_completed_tasks_count() }}/{{ protocol.tasks|length }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Airdrops</small>
+                                    {% set airdrop_value = protocol.get_total_airdrop_value() %}
+                                    {% if airdrop_value > 0 %}
+                                        <strong class="text-warning">${{ "%.0f"|format(airdrop_value) }}</strong>
+                                    {% elif protocol.airdrops %}
+                                        <strong class="text-info">{{ protocol.airdrops|length }}</strong>
+                                    {% else %}
+                                        <strong class="text-muted">0</strong>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-primary btn-sm flex-fill" 
+                                        onclick="toggleDetails('{{ protocol.id }}')">
+                                    <i class="fas fa-chevron-down me-1" id="chevron-{{ protocol.id }}"></i>
+                                    <span id="btn-text-{{ protocol.id }}">Show More</span>
+                                </button>
+                                <a href="{{ url_for('protocol_details', protocol_id=protocol.id) }}" 
+                                   class="btn btn-info btn-sm">
+                                    <i class="fas fa-eye"></i>
                                 </a>
                             </div>
 
-                            <!-- Links -->
-                            <div class="d-grid gap-2">
-                                {% if protocol.website %}
-                                    <a href="{{ protocol.website }}" target="_blank" class="btn btn-outline-light btn-sm">
-                                        <i class="fas fa-globe me-2"></i>
-                                        Official Website
-                                        <i class="fas fa-external-link-alt ms-1 small"></i>
-                                    </a>
-                                {% endif %}
+                            <!-- Expandable Details -->
+                            <div class="collapse protocol-details" id="details-{{ protocol.id }}">
+                                <hr class="my-3">
                                 
-                                {% if protocol.twitter %}
-                                    <a href="https://twitter.com/{{ protocol.twitter }}" target="_blank" class="btn btn-outline-info btn-sm">
-                                        <i class="fab fa-twitter me-2"></i>
-                                        @{{ protocol.twitter }}
-                                        <i class="fas fa-external-link-alt ms-1 small"></i>
-                                    </a>
+                                <!-- Start Date -->
+                                {% if protocol.start_date %}
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            Started: {{ protocol.start_date }}
+                                        </small>
+                                    </div>
                                 {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="card-footer bg-dark border-secondary">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    {% if protocol.created_at %}
-                                        Added: {{ protocol.created_at.strftime('%Y-%m-%d') }}
+
+                                <!-- Quick Actions -->
+                                <div class="mb-3">
+                                    <div class="btn-group w-100" role="group">
+                                        <button type="button" class="btn btn-outline-success btn-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#investmentModal{{ protocol.id }}">
+                                            <i class="fas fa-dollar-sign me-1"></i>
+                                            Investment
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#taskModal{{ protocol.id }}">
+                                            <i class="fas fa-plus me-1"></i>
+                                            Task
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#airdropModal{{ protocol.id }}">
+                                            <i class="fas fa-gift me-1"></i>
+                                            Airdrop
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Recent Tasks -->
+                                {% if protocol.tasks %}
+                                    <div class="mb-3">
+                                        <small class="text-muted fw-bold">Recent Tasks:</small>
+                                        <div class="mt-2">
+                                            {% for task in protocol.tasks[:3] %}
+                                                <div class="d-flex justify-content-between align-items-center mb-1 p-1 rounded" 
+                                                     style="background-color: rgba(255,255,255,0.05);">
+                                                    <small class="text-truncate me-2" style="max-width: 70%;">{{ task.title }}</small>
+                                                    <div>
+                                                        <form style="display: inline;" method="POST" action="{{ url_for('toggle_task', task_id=task.id) }}">
+                                                            <button type="submit" class="btn btn-sm p-0 border-0" 
+                                                                    style="background: none; color: {{ 'var(--bs-success)' if task.status.value == 'completed' else 'var(--bs-secondary)' }};">
+                                                                <i class="fas fa-{{ 'check-circle' if task.status.value == 'completed' else 'circle' }}"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                            {% if protocol.tasks|length > 3 %}
+                                                <small class="text-muted">... and {{ protocol.tasks|length - 3 }} more</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Links -->
+                                <div class="d-grid gap-1">
+                                    {% if protocol.website %}
+                                        <a href="{{ protocol.website }}" target="_blank" class="btn btn-outline-light btn-sm">
+                                            <i class="fas fa-globe me-2"></i>
+                                            Website
+                                            <i class="fas fa-external-link-alt ms-1 small"></i>
+                                        </a>
                                     {% endif %}
-                                </small>
-                                <div>
-                                    <a href="{{ url_for('edit_protocol', protocol_id=protocol.id) }}" 
-                                       class="btn btn-outline-warning btn-sm me-2" 
-                                       title="Edit Protocol">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{{ url_for('delete_protocol', protocol_id=protocol.id) }}" 
-                                       class="btn btn-outline-danger btn-sm" 
-                                       onclick="return confirm('Are you sure you want to delete this protocol?')"
-                                       title="Delete Protocol">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                    
+                                    {% if protocol.twitter %}
+                                        <a href="https://twitter.com/{{ protocol.twitter }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                            <i class="fab fa-twitter me-2"></i>
+                                            @{{ protocol.twitter }}
+                                            <i class="fas fa-external-link-alt ms-1 small"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Added Date -->
+                                <div class="mt-3 pt-2 border-top">
+                                    <small class="text-muted">
+                                        {% if protocol.created_at %}
+                                            Added: {{ protocol.created_at.strftime('%Y-%m-%d') }}
+                                        {% endif %}
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -247,7 +271,7 @@
             {% endfor %}
         </div>
         
-        <!-- Investment and Task Modals -->
+        <!-- Modals -->
         {% for protocol in protocols %}
             <!-- Investment Modal -->
             <div class="modal fade" id="investmentModal{{ protocol.id }}" tabindex="-1">
@@ -266,8 +290,8 @@
                                 <div class="mb-3">
                                     <label class="form-label">Type</label>
                                     <select class="form-select" name="type" required>
-                                        <option value="entrada">Entry (Investment)</option>
-                                        <option value="retirada">Withdrawal</option>
+                                        <option value="entry">Entry (Investment)</option>
+                                        <option value="withdrawal">Withdrawal</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
@@ -317,6 +341,51 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Airdrop Modal -->
+            <div class="modal fade" id="airdropModal{{ protocol.id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add Airdrop - {{ protocol.name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form method="POST" action="{{ url_for('add_airdrop', protocol_id=protocol.id) }}">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Token/Coin Name</label>
+                                    <input type="text" class="form-control" name="token" required 
+                                           placeholder="e.g., ARB, OP, AVAX">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Amount</label>
+                                    <input type="number" class="form-control" name="amount" step="0.001" min="0" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Value (USD) - Optional</label>
+                                    <input type="number" class="form-control" name="value" step="0.01" min="0"
+                                           placeholder="Leave empty if not received yet">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" name="status" required>
+                                        <option value="pending">Waiting</option>
+                                        <option value="received">Received</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Date (optional)</label>
+                                    <input type="date" class="form-control" name="date">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-warning">Add Airdrop</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         {% endfor %}
         
     {% else %}
@@ -331,10 +400,16 @@
                     <p class="text-muted mb-4">
                         Start tracking your airdrop farming by adding your first protocol.
                     </p>
-                    <a href="{{ url_for('add_protocol') }}" class="btn btn-info btn-lg">
-                        <i class="fas fa-plus me-2"></i>
-                        Add Your First Protocol
-                    </a>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{{ url_for('add_protocol') }}" class="btn btn-info btn-lg">
+                            <i class="fas fa-plus me-2"></i>
+                            Add Your First Protocol
+                        </a>
+                        <a href="{{ url_for('create_demo_data') }}" class="btn btn-outline-success btn-lg">
+                            <i class="fas fa-flask me-2"></i>
+                            Create Demo Data
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -344,6 +419,23 @@
 
 {% block scripts %}
 <script>
+// Toggle protocol details
+function toggleDetails(protocolId) {
+    const details = document.getElementById('details-' + protocolId);
+    const chevron = document.getElementById('chevron-' + protocolId);
+    const btnText = document.getElementById('btn-text-' + protocolId);
+    
+    if (details.classList.contains('show')) {
+        details.classList.remove('show');
+        chevron.className = 'fas fa-chevron-down me-1';
+        btnText.textContent = 'Show More';
+    } else {
+        details.classList.add('show');
+        chevron.className = 'fas fa-chevron-up me-1';
+        btnText.textContent = 'Show Less';
+    }
+}
+
 // Auto-hide alerts after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {
     const alerts = document.querySelectorAll('.alert');
@@ -357,4 +449,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+
 {% endblock %}

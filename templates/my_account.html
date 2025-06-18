@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}{{ translate('my_account') }} - Droppes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>{{ translate('account_info') }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Basic Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Username:</strong><br>
+                                <span class="text-muted">{{ current_user.username }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>{{ translate('protocols') }}:</strong><br>
+                                <span class="text-muted">{{ user_stats.protocol_count }} / {{ current_user.get_protocol_limit() }}</span><br>
+                                <small>{{ translate('limit_protocols', limit=current_user.get_protocol_limit()) }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subscription Status -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>{{ translate('subscription_status') }}</h5>
+                            <div class="alert alert-info">
+                                <i class="fas fa-crown me-2"></i>
+                                <strong>{{ translate('free_plan') }}</strong> - 
+                                {{ translate('limit_protocols', limit=current_user.get_protocol_limit()) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Language Settings -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>{{ translate('language') }}</h5>
+                            <div class="mb-3">
+                                <label class="form-label">{{ translate('change_language') }}:</label>
+                                <div class="btn-group w-100" role="group">
+                                    {% for lang in get_available_languages() %}
+                                        <a href="{{ url_for('set_language_route', language=lang.code) }}" 
+                                           class="btn btn-outline-primary {% if get_current_language() == lang.code %}active{% endif %}">
+                                            {% if lang.code == 'pt' %}🇧🇷{% else %}🇺🇸{% endif %} {{ lang.name }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                                <small class="form-text text-muted mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% if get_current_language() == 'pt' %}
+                                        O idioma da interface será alterado imediatamente após a seleção.
+                                    {% else %}
+                                        The interface language will be changed immediately after selection.
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5>{{ translate('quick_actions') }}</h5>
+                            <div class="d-grid gap-2 d-md-flex">
+                                <a href="{{ url_for('add_protocol') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>{{ translate('add_protocol') }}
+                                </a>
+                                <a href="{{ url_for('airdrop_calendar') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-calendar-alt me-2"></i>{{ translate('calendar') }}
+                                </a>
+                                <a href="{{ url_for('analytics_dashboard') }}" class="btn btn-outline-info">
+                                    <i class="fas fa-chart-bar me-2"></i>{{ translate('analytics') }}
+                                </a>
+                                <a href="{{ url_for('upgrade_page') }}" class="btn btn-warning">
+                                    <i class="fas fa-crown me-2"></i>{{ translate('upgrade_premium') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,628 @@
+{% extends "base.html" %}
+
+{% block title %}{{ translate('airdrop_calendar') }} - Droppes{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-6 mb-1">
+                        <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                        {{ translate('airdrop_calendar') }}
+                    </h1>
+                    <p class="text-muted mb-0">{{ translate('visualize_airdrops') }}</p>
+                </div>
+                {% if protocols %}
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAirdropModal">
+                    <i class="fas fa-plus me-2"></i>Add Airdrop
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if not protocols %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card text-center">
+                <div class="card-body py-5">
+                    <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                    <h3 class="text-muted">{{ translate('no_protocols_found') }}</h3>
+                    <p class="text-muted mb-4">{{ translate('add_protocols_message') }}</p>
+                    <a href="{{ url_for('add_protocol') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>{{ translate('add_protocol') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h3 class="mb-0">${{ "{:,.2f}".format(calendar_data.stats.total_received) }}</h3>
+                    <p class="mb-0">{{ translate('received_this_month') }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h3 class="mb-0">{{ calendar_data.stats.total_airdrops }}</h3>
+                    <p class="mb-0">{{ translate('airdrops_received') }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <h3 class="mb-0">{{ calendar_data.stats.expected_airdrops }}</h3>
+                    <p class="mb-0">{{ translate('expected_airdrops') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendário -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            {{ calendar_data.navigation.current_month_name }} {{ current_year }}
+                        </h5>
+                        <div class="btn-group">
+                            <a href="{{ url_for('airdrop_calendar', year=calendar_data.navigation.prev_year, month=calendar_data.navigation.prev_month) }}" 
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-chevron-left"></i> {{ translate('previous') }}
+                            </a>
+                            <a href="{{ url_for('airdrop_calendar') }}" class="btn btn-outline-primary btn-sm">
+                                {{ translate('today') }}
+                            </a>
+                            <a href="{{ url_for('airdrop_calendar', year=calendar_data.navigation.next_year, month=calendar_data.navigation.next_month) }}" 
+                               class="btn btn-outline-secondary btn-sm">
+                                {{ translate('next') }} <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center py-3">{{ translate('sunday') }}</th>
+                                    <th class="text-center py-3">{{ translate('monday') }}</th>
+                                    <th class="text-center py-3">{{ translate('tuesday') }}</th>
+                                    <th class="text-center py-3">{{ translate('wednesday') }}</th>
+                                    <th class="text-center py-3">{{ translate('thursday') }}</th>
+                                    <th class="text-center py-3">{{ translate('friday') }}</th>
+                                    <th class="text-center py-3">{{ translate('saturday') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for week in calendar_data.calendar %}
+                                <tr>
+                                    {% for day in week %}
+                                    <td class="calendar-day p-2" style="height: 120px; vertical-align: top;">
+                                        {% if day == 0 %}
+                                            <!-- Dia vazio -->
+                                        {% else %}
+                                            <div class="day-number fw-bold mb-1">{{ day }}</div>
+                                            
+                                            {% if day in calendar_data.airdrops_by_date %}
+                                                {% for airdrop in calendar_data.airdrops_by_date[day] %}
+                                                <div class="airdrop-item mb-1">
+                                                    {% if airdrop.type == 'received' %}
+                                                        <span class="badge bg-success text-truncate d-block" style="font-size: 0.7rem;">
+                                                            {{ airdrop.token }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning text-dark text-truncate d-block" style="font-size: 0.7rem;">
+                                                            {{ airdrop.token }}
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legenda -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{{ translate('legend') }}</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <span class="badge bg-success me-2">{{ translate('token') }}</span>
+                            <span>{{ translate('received_airdrop') }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="badge bg-warning text-dark me-2">{{ translate('token') }}</span>
+                            <span>{{ translate('expected_airdrop') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista Detalhada dos Airdrops do Mês -->
+    {% if calendar_data.airdrops_by_date %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>{{ translate('airdrop_details') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{{ translate('date') }}</th>
+                                    <th>{{ translate('protocol') }}</th>
+                                    <th>{{ translate('token') }}</th>
+                                    <th>{{ translate('type') }}</th>
+                                    <th>{{ translate('network') }}</th>
+                                    <th>{{ translate('value') }}</th>
+                                    <th>{{ translate('status') }}</th>
+                                    <th>{{ translate('actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for day, airdrops in calendar_data.airdrops_by_date.items() %}
+                                    {% for airdrop in airdrops %}
+                                    <tr>
+                                        <td>{{ airdrop.date.strftime('%d/%m/%Y') }}</td>
+                                        <td><strong>{{ airdrop.protocol }}</strong></td>
+                                        <td>{{ airdrop.token }}</td>
+                                        <td>
+                                            {% if airdrop.airdrop_type %}
+                                                <span class="badge bg-info">{{ airdrop.airdrop_type.upper() }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><span class="badge bg-primary">{{ airdrop.network }}</span></td>
+                                        <td>
+                                            {% if airdrop.value > 0 %}
+                                                <span class="text-success">${{ "{:,.2f}".format(airdrop.value) }}</span>
+                                            {% else %}
+                                                <span class="text-muted">{{ translate('not_informed') }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if airdrop.type == 'received' %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>{{ translate('received') }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-clock me-1"></i>{{ translate('expected') }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm btn-outline-primary btn-edit-airdrop" 
+                                                        data-airdrop-id="{{ airdrop.id }}"
+                                                        data-protocol="{{ airdrop.protocol }}"
+                                                        data-token="{{ airdrop.token }}"
+                                                        data-expected-date="{{ airdrop.expected_date or '' }}"
+                                                        data-received-date="{{ airdrop.received_date or '' }}"
+                                                        data-airdrop-type="{{ airdrop.airdrop_type or 'tge' }}"
+                                                        data-tokens-received="{{ airdrop.tokens_received or '' }}"
+                                                        data-price-per-token="{{ airdrop.price_per_token or '' }}"
+                                                        data-status="{{ airdrop.status }}"
+                                                        data-notes="{{ airdrop.notes or '' }}"
+                                                        title="{{ translate('edit') }} {{ translate('airdrop') }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger btn-delete-airdrop"
+                                                        data-airdrop-id="{{ airdrop.id }}"
+                                                        data-protocol="{{ airdrop.protocol }}"
+                                                        data-token="{{ airdrop.token }}"
+                                                        title="{{ translate('delete') }} {{ translate('airdrop') }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+
+    <!-- Modal para Adicionar Airdrop -->
+    {% if protocols %}
+    <div class="modal fade" id="addAirdropModal" tabindex="-1" aria-labelledby="addAirdropModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAirdropModalLabel">
+                        <i class="fas fa-plus me-2"></i>{{ translate('add_expected_airdrop') }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{{ url_for('add_calendar_airdrop') }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="protocol_id" class="form-label">{{ translate('protocol') }} *</label>
+                            <select class="form-select" id="protocol_id" name="protocol_id" required>
+                                <option value="">{{ translate('select_protocol') }}</option>
+                                {% for protocol in protocols %}
+                                <option value="{{ protocol.id }}">{{ protocol.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="token_name" class="form-label">{{ translate('token_name') }} *</label>
+                            <input type="text" class="form-control" id="token_name" name="token_name" required 
+                                   placeholder="e.g., EIGEN, STRK, ARB">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="expected_date" class="form-label">{{ translate('expected_date') }}</label>
+                            <input type="date" class="form-control" id="expected_date" name="expected_date">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="airdrop_type" class="form-label">{{ translate('airdrop_type') }}</label>
+                            <select class="form-select" name="airdrop_type">
+                                <option value="expected">{{ translate('expected') }}</option>
+                                <option value="received">{{ translate('received') }}</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">{{ translate('notes') }}</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="{{ translate('additional_info') }}"></textarea>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-lightbulb me-1"></i>{{ translate('tip_edit_later') }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ translate('cancel') }}</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>{{ translate('add_airdrop') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Editar Airdrop -->
+    <div class="modal fade" id="editAirdropModal" tabindex="-1" aria-labelledby="editAirdropModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editAirdropModalLabel">
+                        <i class="fas fa-edit me-2"></i>Editar Airdrop
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editAirdropForm" method="POST">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit_token_name" class="form-label">
+                                        <i class="fas fa-coins me-1"></i>Nome do Token *
+                                    </label>
+                                    <input type="text" class="form-control" id="edit_token_name" name="token_name" 
+                                           placeholder="Ex: TOKEN, COIN, etc." required maxlength="100">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit_airdrop_type" class="form-label">
+                                        <i class="fas fa-rocket me-1"></i>Tipo de Lançamento
+                                    </label>
+                                    <select class="form-select" id="edit_airdrop_type" name="airdrop_type">
+                                        <option value="tge">TGE (Token Generation Event)</option>
+                                        <option value="checker">Checker (Verificação de Elegibilidade)</option>
+                                        <option value="claim">Claim (Resgate)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit_expected_date" class="form-label">
+                                        <i class="fas fa-calendar me-1"></i>Data Esperada
+                                    </label>
+                                    <input type="date" class="form-control" id="edit_expected_date" name="expected_date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit_received_date" class="form-label">
+                                        <i class="fas fa-calendar-check me-1"></i>Data Recebida
+                                    </label>
+                                    <input type="date" class="form-control" id="edit_received_date" name="received_date">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="edit_tokens_received" class="form-label">
+                                        <i class="fas fa-coins me-1"></i>Tokens Recebidos
+                                    </label>
+                                    <input type="number" class="form-control" id="edit_tokens_received" name="tokens_received" 
+                                           step="0.000001" min="0" placeholder="0.000000">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="edit_price_per_token" class="form-label">
+                                        <i class="fas fa-dollar-sign me-1"></i>Preço por Token ($)
+                                    </label>
+                                    <input type="number" class="form-control" id="edit_price_per_token" name="price_per_token" 
+                                           step="0.000001" min="0" placeholder="0.000000">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="edit_status" class="form-label">
+                                        <i class="fas fa-flag me-1"></i>Status
+                                    </label>
+                                    <select class="form-select" id="edit_status" name="status">
+                                        <option value="pending">Pending</option>
+                                        <option value="received">Received</option>
+                                        <option value="sold">Sold</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit_notes" class="form-label">
+                                <i class="fas fa-sticky-note me-1"></i>Notes
+                            </label>
+                            <textarea class="form-control" id="edit_notes" name="notes" rows="3" 
+                                      placeholder="Additional information about the airdrop"></textarea>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Tip:</strong> Mark as "Received" and fill in the values when the airdrop is distributed.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="deleteAirdropModal" tabindex="-1" aria-labelledby="deleteAirdropModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteAirdropModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-warning me-2"></i>
+                        <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+                    </div>
+                    <p>Tem certeza que deseja deletar o airdrop:</p>
+                    <div class="bg-light p-3 rounded">
+                        <strong id="delete-airdrop-info"></strong>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <form id="deleteAirdropForm" method="POST" style="display: inline;">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Sim, Deletar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.calendar-day {
+    width: 14.28%;
+    min-height: 120px;
+}
+
+.day-number {
+    font-size: 1rem;
+    color: #495057;
+}
+
+.airdrop-item .badge {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Definir data mínima como hoje
+    const expectedDateInput = document.getElementById('expected_date');
+    if (expectedDateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        expectedDateInput.min = today;
+        
+        // Definir data padrão como amanhã
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        expectedDateInput.value = tomorrow.toISOString().split('T')[0];
+    }
+    
+    // Auto-focus on protocol field when modal opens
+    const addAirdropModal = document.getElementById('addAirdropModal');
+    if (addAirdropModal) {
+        addAirdropModal.addEventListener('shown.bs.modal', function () {
+            document.getElementById('protocol_id').focus();
+        });
+        
+        // Limpar formulário quando modal fechar
+        addAirdropModal.addEventListener('hidden.bs.modal', function () {
+            const form = addAirdropModal.querySelector('form');
+            if (form) {
+                form.reset();
+                // Redefinir data padrão
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                expectedDateInput.value = tomorrow.toISOString().split('T')[0];
+            }
+        });
+    }
+    
+    // Validação em tempo real do nome do token
+    const tokenNameInput = document.getElementById('token_name');
+    if (tokenNameInput) {
+        tokenNameInput.addEventListener('input', function() {
+            // Converter para maiúsculas e remover espaços
+            this.value = this.value.toUpperCase().replace(/\s+/g, '');
+        });
+    }
+});
+
+// Função para abrir modal com data específica (caso seja implementada no futuro)
+function openAddAirdropModal(date) {
+    const modal = new bootstrap.Modal(document.getElementById('addAirdropModal'));
+    const dateInput = document.getElementById('expected_date');
+    if (dateInput && date) {
+        dateInput.value = date;
+    }
+    modal.show();
+}
+
+// Função para abrir modal de edição
+function openEditModal(airdropId, protocol, token, expectedDate, receivedDate, airdropType, tokensReceived, pricePerToken, status, notes) {
+    // Preencher os campos do formulário
+    document.getElementById('edit_token_name').value = token;
+    document.getElementById('edit_airdrop_type').value = airdropType;
+    document.getElementById('edit_expected_date').value = expectedDate;
+    document.getElementById('edit_received_date').value = receivedDate;
+    document.getElementById('edit_tokens_received').value = tokensReceived;
+    document.getElementById('edit_price_per_token').value = pricePerToken;
+    document.getElementById('edit_status').value = status;
+    document.getElementById('edit_notes').value = notes;
+    
+    // Definir a action do formulário
+    const form = document.getElementById('editAirdropForm');
+    form.action = `/calendar/edit_airdrop/${airdropId}`;
+    
+    // Atualizar o título do modal
+    document.getElementById('editAirdropModalLabel').innerHTML = 
+        `<i class="fas fa-edit me-2"></i>Editar Airdrop - ${protocol}`;
+    
+    // Abrir o modal
+    const modal = new bootstrap.Modal(document.getElementById('editAirdropModal'));
+    modal.show();
+}
+
+// Função para abrir modal de exclusão
+function openDeleteModal(airdropId, protocol, token) {
+    // Atualizar informações do airdrop a ser deletado
+    document.getElementById('delete-airdrop-info').innerHTML = 
+        `<i class="fas fa-project-diagram me-2"></i>${protocol} - <i class="fas fa-coins me-1"></i>${token}`;
+    
+    // Definir a action do formulário
+    const form = document.getElementById('deleteAirdropForm');
+    form.action = `/calendar/delete_airdrop/${airdropId}`;
+    
+    // Abrir o modal
+    const modal = new bootstrap.Modal(document.getElementById('deleteAirdropModal'));
+    modal.show();
+}
+
+// Event listeners para botões de editar
+document.addEventListener('DOMContentLoaded', function() {
+    // ... código existente ...
+    
+    // Adicionar event listeners para botões de editar
+    document.querySelectorAll('.btn-edit-airdrop').forEach(button => {
+        button.addEventListener('click', function() {
+            const airdropId = this.dataset.airdropId;
+            const protocol = this.dataset.protocol;
+            const token = this.dataset.token;
+            const expectedDate = this.dataset.expectedDate;
+            const receivedDate = this.dataset.receivedDate;
+            const airdropType = this.dataset.airdropType;
+            const tokensReceived = this.dataset.tokensReceived;
+            const pricePerToken = this.dataset.pricePerToken;
+            const status = this.dataset.status;
+            const notes = this.dataset.notes;
+            
+            openEditModal(airdropId, protocol, token, expectedDate, receivedDate, 
+                         airdropType, tokensReceived, pricePerToken, status, notes);
+        });
+    });
+    
+    // Adicionar event listeners para botões de deletar
+    document.querySelectorAll('.btn-delete-airdrop').forEach(button => {
+        button.addEventListener('click', function() {
+            const airdropId = this.dataset.airdropId;
+            const protocol = this.dataset.protocol;
+            const token = this.dataset.token;
+            
+            openDeleteModal(airdropId, protocol, token);
+        });
+    });
+});
+</script>
+{% endblock %} 

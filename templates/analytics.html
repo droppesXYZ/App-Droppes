@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ translate('analytics') }} - Droppes{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-6 mb-1">
+                <i class="fas fa-chart-bar me-2 text-info"></i>
+                {{ translate('analytics') }}
+            </h1>
+            <p class="text-muted mb-0">{{ translate('analytics_overview') }}</p>
+        </div>
+    </div>
+
+    {% if not protocols %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card text-center">
+                <div class="card-body py-5">
+                    <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+                    <h3 class="text-muted">No data for analysis</h3>
+                    <p class="text-muted mb-4">Add some protocols and airdrops to see your analytics here.</p>
+                    <a href="{{ url_for('add_protocol') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Protocol
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h3 class="mb-0">${{ "{:,.2f}".format(analytics_data.totals.total_investment) }}</h3>
+                    <p class="mb-0">Total Invested</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h3 class="mb-0">${{ "{:,.2f}".format(analytics_data.totals.total_airdrop_value) }}</h3>
+                    <p class="mb-0">Total in Airdrops</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <h3 class="mb-0">{{ "{:.1f}".format(analytics_data.totals.roi_percentage) }}%</h3>
+                    <p class="mb-0">Total ROI</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h3 class="mb-0">{{ analytics_data.totals.total_airdrops }}</h3>
+                    <p class="mb-0">Total Airdrops</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-trophy me-2"></i>Top Protocols by ROI
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if analytics_data.top_protocols %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Protocol</th>
+                                    <th>Network</th>
+                                    <th>Investment</th>
+                                    <th>Airdrops</th>
+                                    <th>ROI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in analytics_data.top_protocols[:5] %}
+                                <tr>
+                                    <td><strong>{{ item.protocol.name }}</strong></td>
+                                    <td><span class="badge bg-primary">{{ item.protocol.network }}</span></td>
+                                    <td>${{ "{:,.2f}".format(item.investment) }}</td>
+                                    <td>${{ "{:,.2f}".format(item.airdrop_value) }}</td>
+                                    <td>
+                                        <span class="badge bg-success">{{ "{:.1f}".format(item.roi) }}%</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">No ROI calculated yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %} 

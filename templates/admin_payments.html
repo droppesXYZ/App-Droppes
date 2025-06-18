@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Verificar Pagamentos - Droppes{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-6 mb-1">
+                <i class="fas fa-shield-alt me-2 text-danger"></i>
+                Administração - Pagamentos
+            </h1>
+            <p class="text-muted">Verificação manual de pagamentos Premium</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        {% set pending_count = payments|selectattr("status.value", "equalto", "pendente")|list|length %}
+        {% set verified_count = payments|selectattr("status.value", "equalto", "verificado")|list|length %}
+        {% set failed_count = payments|selectattr("status.value", "equalto", "falhado")|list|length %}
+        
+        <div class="col-md-4 mb-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h3 class="text-warning">{{ pending_count }}</h3>
+                    <p class="mb-0">Pendentes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h3 class="text-success">{{ verified_count }}</h3>
+                    <p class="mb-0">Verificados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <h3 class="text-danger">{{ failed_count }}</h3>
+                    <p class="mb-0">Rejeitados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    {% if payments %}
+    <div class="card border-secondary">
+        <div class="card-header bg-dark border-secondary">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-list me-2"></i>
+                Todos os Pagamentos
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-dark table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuário</th>
+                            <th>Data</th>
+                            <th>Valor</th>
+                            <th>Plano</th>
+                            <th>Status</th>
+                            <th>Transação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr class="{% if payment.status.value == 'pendente' %}table-warning{% elif payment.status.value == 'verificado' %}table-success{% elif payment.status.value == 'falhado' %}table-danger{% endif %}">
+                            <td>{{ payment.id }}</td>
+                            <td>
+                                <strong>{{ payment.user.display_name }}</strong>
+                                <br>
+                                <small class="text-muted">{{ payment.user.username }}</small>
+                                {% if payment.user.is_premium %}
+                                    <br><span class="badge bg-warning text-dark">Premium</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ payment.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>${{ "%.2f"|format(payment.amount_usd) }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ payment.subscription_plan.value }}</span>
+                                <br>
+                                <small class="text-muted">{{ payment.plan_months }} mês(es)</small>
+                                <br>
+                                <small class="text-muted">{{ payment.token_symbol }} • {{ payment.network }}</small>
+                            </td>
+                            <td>
+                                {% if payment.status.value == 'verificado' %}
+                                    <span class="badge bg-success">{{ payment.status_display }}</span>
+                                    {% if payment.verified_at %}
+                                        <br><small class="text-muted">{{ payment.verified_at.strftime('%d/%m %H:%M') }}</small>
+                                    {% endif %}
+                                {% elif payment.status.value == 'falhado' %}
+                                    <span class="badge bg-danger">{{ payment.status_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning">{{ payment.status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.transaction_hash %}
+                                    <div class="mb-2">
+                                        <a href="https://solscan.io/tx/{{ payment.transaction_hash }}" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-external-link-alt me-1"></i>
+                                            Ver
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted font-monospace">
+                                            {{ payment.transaction_hash[:8] }}...{{ payment.transaction_hash[-8:] }}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">
+                                            De: {{ payment.wallet_address[:8] }}...{{ payment.wallet_address[-8:] }}
+                                        </small>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.status.value == 'pendente' %}
+                                    <div class="btn-group-vertical btn-group-sm" role="group">
+                                        <form method="POST" action="{{ url_for('verify_payment', payment_id=payment.id) }}" style="display: inline;">
+                                            <button type="submit" 
+                                                    class="btn btn-success btn-sm"
+                                                    onclick="return confirm('Verificar este pagamento? O usuário será promovido para Premium.')">
+                                                <i class="fas fa-check me-1"></i>
+                                                Aprovar
+                                            </button>
+                                        </form>
+                                        <button type="button" 
+                                                class="btn btn-danger btn-sm mt-1"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#rejectModal{{ payment.id }}">
+                                            <i class="fas fa-times me-1"></i>
+                                            Rejeitar
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle me-2"></i>
+        Nenhum pagamento encontrado.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Reject Modals -->
+{% for payment in payments %}
+    {% if payment.status.value == 'pendente' %}
+    <div class="modal fade" id="rejectModal{{ payment.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Rejeitar Pagamento #{{ payment.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('reject_payment', payment_id=payment.id) }}">
+                    <div class="modal-body">
+                        <p>Tem certeza que deseja rejeitar este pagamento?</p>
+                        <p><strong>Usuário:</strong> {{ payment.user.display_name }}</p>
+                        <p><strong>Valor:</strong> ${{ "%.2f"|format(payment.amount_usd) }}</p>
+                        
+                        <div class="mb-3">
+                            <label for="notes{{ payment.id }}" class="form-label">Motivo da rejeição (opcional):</label>
+                            <textarea class="form-control" 
+                                      id="notes{{ payment.id }}" 
+                                      name="notes" 
+                                      rows="3"
+                                      placeholder="Ex: Transação não encontrada, valor incorreto, etc."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Rejeitar Pagamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+{% endblock %} 

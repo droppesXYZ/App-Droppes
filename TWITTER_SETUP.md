@@ -1,140 +1,64 @@
-# 🐦 Configuração da Funcionalidade de Tweets
+# Configuração do Twitter - Funcionalidade Simplificada
 
-## 📋 Resumo
+## O que mudou?
 
-Esta funcionalidade permite mostrar os 3 últimos tweets de cada protocolo dentro do cartão de detalhes. A atualização pode ser feita manualmente ou automaticamente 1 vez por dia.
+A funcionalidade do Twitter foi **drasticamente simplificada**:
 
-## 🔑 Configuração da API do Twitter
+- ❌ **Removido**: Toda a complexidade do MCP (Model Context Protocol)
+- ❌ **Removido**: Postagem de tweets
+- ❌ **Removido**: Busca avançada
+- ❌ **Removido**: Dashboard complexo
+- ✅ **Mantido**: Busca simples dos últimos 3 tweets de um protocolo (1x por dia)
 
-### 1. Criar App no Twitter Developer Portal
+## Como funciona agora?
 
-1. Acesse [developer.twitter.com](https://developer.twitter.com)
-2. Faça login e vá para o Dashboard
-3. Clique em "Create App" 
-4. Preencha as informações do app:
-   - **App name**: "Crypto Airdrop Manager"
-   - **Description**: "App para gerenciar protocolos de airdrop de criptomoedas"
-   - **Website URL**: Sua URL da aplicação
-   - **Terms of Service**: (opcional)
-   - **Privacy Policy**: (opcional)
+1. **Limite de uso**: Cada protocolo pode buscar tweets apenas **1 vez por dia**
+2. **Quantidade**: Busca apenas os **últimos 3 tweets**
+3. **Resultado**: Links clicáveis para os tweets encontrados
+4. **Interface**: Botão simples "Buscar Tweets" na página de cada protocolo
 
-### 2. Configurar Permissões
+## Configuração (Opcional)
 
-1. Vá para "App Settings" → "User authentication settings"
-2. Clique em "Set up"
-3. Configure:
-   - **App permissions**: Read only
-   - **Type of App**: Web App
-   - **Callback URI**: `http://localhost:8000/callback` (para desenvolvimento)
-   - **Website URL**: Sua URL da aplicação
+Para usar a funcionalidade de busca de tweets, você precisa configurar credenciais do Twitter:
 
-### 3. Obter Bearer Token
+### Opção 1: Bearer Token (Recomendado - Mais Simples)
 
-1. Na aba "Keys and tokens"
-2. Em "Bearer Token", clique em "Generate"
-3. **COPIE E GUARDE** o Bearer Token (só aparece uma vez!)
+1. Acesse [Twitter Developer Portal](https://developer.twitter.com/)
+2. Crie um app e obtenha o Bearer Token
+3. Configure a variável de ambiente:
+   ```
+   TWITTER_BEARER_TOKEN=seu_bearer_token_aqui
+   ```
 
-### 4. Configurar Variável de Ambiente
+### Opção 2: OAuth 1.0a (Mais Complexo)
 
-Adicione ao seu arquivo `.env`:
-
-```bash
-TWITTER_BEARER_TOKEN=seu_bearer_token_aqui
+Configure todas as variáveis:
+```
+TWITTER_API_KEY=sua_api_key
+TWITTER_API_SECRET=sua_api_secret  
+TWITTER_ACCESS_TOKEN=seu_access_token
+TWITTER_ACCESS_TOKEN_SECRET=seu_access_token_secret
 ```
 
-## 🚀 Como Usar
+## Sem Configuração
 
-### 1. Configurar Twitter no Protocolo
+Se você não configurar as credenciais do Twitter:
+- A aplicação funcionará normalmente
+- O botão "Buscar Tweets" mostrará uma mensagem informativa
+- Todas as outras funcionalidades continuam funcionando
 
-1. Ao criar ou editar um protocolo, preencha o campo "Twitter"
-2. Formatos aceitos:
-   - `@username`
-   - `username`
-   - `https://twitter.com/username`
+## Vantagens da Simplificação
 
-### 2. Atualizar Tweets Manualmente
+- ✅ **Menos complexidade**: Código muito mais simples
+- ✅ **Menos dependências**: Menos pontos de falha
+- ✅ **Rate limit friendly**: Uso mínimo da API do Twitter
+- ✅ **Foco no essencial**: Apenas o que realmente importa
+- ✅ **Mais estável**: Menos chances de erro
 
-1. Acesse os detalhes de um protocolo
-2. Clique na aba "Tweets"
-3. Clique no botão "Update" para buscar os últimos tweets
+## Como usar
 
-### 3. Atualização Automática Diária
-
-#### Windows (Task Scheduler)
-
-1. Abra o "Agendador de Tarefas"
-2. Clique em "Criar Tarefa Básica"
-3. Configure:
-   - **Nome**: "Atualizar Tweets Protocolos"
-   - **Disparador**: Diariamente às 08:00
-   - **Ação**: Iniciar programa
-   - **Programa**: `python`
-   - **Argumentos**: `update_tweets_cron.py`
-   - **Iniciar em**: Caminho da sua aplicação
-
-#### Linux/macOS (Cron)
-
-1. Abra o terminal
-2. Execute: `crontab -e`
-3. Adicione a linha:
-```bash
-0 8 * * * cd /caminho/para/sua/aplicacao && python update_tweets_cron.py
-```
-
-## 📊 Limites da API Gratuita
-
-### Twitter API v2 Free Tier
-- **500.000 tweets por mês**
-- **300 requests por 15 minutos**
-- Perfeitamente suficiente para uso pessoal
-
-### Cálculo do Consumo
-- 3 tweets por protocolo
-- 2 requests por protocolo (1 para buscar user_id, 1 para tweets)
-- Exemplo: 50 protocolos = 100 requests por dia = 3.000 requests por mês
-
-## 🔧 Solução de Problemas
-
-### Erro: "Twitter Bearer Token não configurado"
-- Verifique se a variável `TWITTER_BEARER_TOKEN` está no arquivo `.env`
-- Certifique-se que o Bearer Token está correto
-
-### Erro: "Erro ao buscar tweets para username"
-- Verifique se o username está correto (sem espaços, caracteres especiais)
-- Certifique-se que a conta existe e é pública
-- Verifique se não excedeu os limites da API
-
-### Erro: "401 Unauthorized"
-- Bearer Token inválido ou expirado
-- Gere um novo Bearer Token no Twitter Developer Portal
-
-### Nenhum tweet aparece
-- A conta pode não ter tweets públicos
-- A conta pode estar privada
-- Verifique se o username está no formato correto
-
-## 💡 Dicas
-
-1. **Teste primeiro manualmente** antes de configurar a atualização automática
-2. **Use usernames simples** (prefira @username ao invés de URLs completas)
-3. **Monitore os logs** em `twitter_updates.log`
-4. **Não abuse da API** - respeite os limites
-
-## 🆓 Alternativas Gratuitas (Futuras)
-
-Se preferir não usar a API oficial:
-
-1. **RSS Feeds de terceiros** (limitado)
-2. **Nitter instances** (instável)
-3. **Web scraping** (contra ToS)
-
-A API oficial é a opção mais confiável e legal.
-
-## 📞 Suporte
-
-Se encontrar problemas:
-
-1. Verifique os logs em `twitter_updates.log`
-2. Teste manualmente primeiro
-3. Verifique as configurações da API
-4. Consulte a documentação oficial do Twitter 
+1. Vá para a página de detalhes de um protocolo
+2. Certifique-se de que o campo "Twitter" está preenchido (ex: @protocol_name)
+3. Clique em "Buscar Tweets"
+4. Os últimos 3 tweets aparecerão como links clicáveis
+5. Só poderá buscar novamente no dia seguinte 

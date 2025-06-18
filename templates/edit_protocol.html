@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Protocol - Crypto Airdrop Manager{% endblock %}
+{% block title %}Edit Protocol - Droppes{% endblock %}
 
 {% block content %}
 <div class="container my-4">
@@ -146,6 +146,76 @@
                             <div class="form-text">Check if this protocol requires daily interactions</div>
                         </div>
 
+                        <!-- Visual Customization -->
+                        <div class="card border-secondary mb-4">
+                            <div class="card-header bg-dark border-secondary">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-palette me-2"></i>
+                                    Visual Customization (Optional)
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- Logo URL -->
+                                <div class="mb-3">
+                                    <label for="logo_url" class="form-label">
+                                        <i class="fas fa-image me-1"></i>
+                                        Logo URL
+                                    </label>
+                                    <input type="url" 
+                                           class="form-control" 
+                                           id="logo_url" 
+                                           name="logo_url"
+                                           value="{{ protocol.logo_url or '' }}" 
+                                           placeholder="https://protocol.com/logo.png">
+                                    <div class="form-text">Direct link to the protocol's logo (will be shown as 24x24px)</div>
+                                </div>
+
+                                <!-- Background Image URL -->
+                                <div class="mb-3">
+                                    <label for="background_image_url" class="form-label">
+                                        <i class="fas fa-image me-1"></i>
+                                        Background Image URL
+                                    </label>
+                                    <input type="url" 
+                                           class="form-control" 
+                                           id="background_image_url" 
+                                           name="background_image_url"
+                                           value="{{ protocol.background_image_url or '' }}" 
+                                           placeholder="https://protocol.com/background.jpg">
+                                    <div class="form-text">Background image for the card (will be darkened for readability)</div>
+                                </div>
+
+                                <!-- Primary Color -->
+                                <div class="mb-3">
+                                    <label for="primary_color" class="form-label">
+                                        <i class="fas fa-palette me-1"></i>
+                                        Primary Color
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="color" 
+                                               class="form-control form-control-color" 
+                                               id="primary_color" 
+                                               name="primary_color" 
+                                               value="{{ protocol.primary_color or protocol.get_network_color() }}"
+                                               style="width: 60px;">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="primary_color_text"
+                                               value="{{ protocol.primary_color or protocol.get_network_color() }}" 
+                                               placeholder="#627eea">
+                                    </div>
+                                    <div class="form-text">Choose a color that represents this protocol (defaults to network color)</div>
+                                </div>
+
+                                <div class="alert alert-info d-flex align-items-center">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    <div>
+                                        <strong>Tip:</strong> If you only enter the website URL, we'll try to automatically fetch the favicon as the logo.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Submit Buttons -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="{{ url_for('index') }}" class="btn btn-secondary">
@@ -230,6 +300,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Color picker synchronization
+    const colorPicker = document.getElementById('primary_color');
+    const colorText = document.getElementById('primary_color_text');
+    
+    if (colorPicker && colorText) {
+        colorPicker.addEventListener('input', function() {
+            colorText.value = this.value;
+        });
+        
+        colorText.addEventListener('input', function() {
+            if (this.value.match(/^#[0-9A-F]{6}$/i)) {
+                colorPicker.value = this.value;
+            }
+        });
+    }
+
+    // Auto-generate favicon URL from website
+    const websiteInput = document.getElementById('website');
+    const logoInput = document.getElementById('logo_url');
+    
+    if (websiteInput && logoInput) {
+        websiteInput.addEventListener('blur', function() {
+            if (this.value && !logoInput.value) {
+                try {
+                    const url = new URL(this.value);
+                    const faviconUrl = `${url.protocol}//${url.hostname}/favicon.ico`;
+                    logoInput.placeholder = `Auto-detected: ${faviconUrl}`;
+                } catch (e) {
+                    // Invalid URL, ignore
+                }
+            }
+        });
+    }
 });
 </script>
 {% endblock %} 

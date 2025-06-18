@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Twitter OAuth - App Droppes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .status-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .success { border-left: 5px solid #28a745; }
+        .ready { border-left: 5px solid #17a2b8; }
+        .error { border-left: 5px solid #dc3545; }
+        .warning { border-left: 5px solid #ffc107; }
+        .rate_limited { border-left: 5px solid #fd7e14; }
+        
+        .message {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fd7e14;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #1da1f2;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0d8bd9;
+        }
+        .button.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .refresh-btn {
+            background-color: #28a745;
+        }
+        .refresh-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-card {{ status }}">
+        <h1>🐦 Status da API do Twitter</h1>
+        
+        <div class="message">{{ message }}</div>
+        
+        {% if status == 'rate_limited' and minutes_left %}
+        <div class="countdown" id="countdown">
+            Próxima verificação em: <span id="timer">{{ minutes_left }}</span> minutos
+        </div>
+        {% endif %}
+        
+        <div>
+            {% if can_login %}
+            <a href="/auth/twitter" class="button">
+                🔐 Fazer Login com Twitter
+            </a>
+            {% else %}
+            <span class="button disabled">
+                🔐 Login Temporariamente Indisponível
+            </span>
+            {% endif %}
+            
+            <a href="/auth/twitter/status" class="button refresh-btn">
+                🔄 Verificar Novamente
+            </a>
+            
+            <a href="/login" class="button" style="background-color: #6c757d;">
+                ← Voltar ao Login
+            </a>
+        </div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666;">
+            <h3>🚀 Sistema Otimizado Anti-Rate Limit</h3>
+            <p>Este sistema foi otimizado para funcionar mesmo com rate limits da API do Twitter!</p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>✅ Login OAuth robusta com fallbacks</li>
+                <li>✅ Cache inteligente para reduzir chamadas à API</li>
+                <li>✅ Lazy loading para evitar sobrecarga</li>
+                <li>✅ Funciona mesmo com API limitada</li>
+            </ul>
+            {% if info %}
+            <p><strong>💡 Dica:</strong> {{ info }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if status == 'rate_limited' and minutes_left %}
+    <script>
+        let timeLeft = {{ minutes_left }} * 60; // Converter para segundos
+        
+        function updateTimer() {
+            var minutes = Math.floor(timeLeft / 60);
+            var seconds = timeLeft % 60;
+            var secondsStr = seconds < 10 ? '0' + seconds : seconds;
+            
+            document.getElementById('timer').textContent = minutes + ':' + secondsStr;
+            
+            if (timeLeft <= 0) {
+                window.location.reload();
+            }
+            
+            timeLeft--;
+        }
+        
+        // Atualizar timer a cada segundo
+        setInterval(updateTimer, 1000);
+        updateTimer(); // Primeira atualização imediata
+    </script>
+    {% endif %}
+</body>
+</html> 

@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}{{ translate('search_tweets') }} - Droppes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">
+                    <i class="fab fa-twitter text-primary me-2"></i>
+                    {{ translate('search_protocol_tweets') }}
+                </h1>
+                
+                <!-- Botão de Conectar Twitter -->
+                {% if not has_twitter_connected %}
+                <div class="d-flex align-items-center gap-3 twitter-header-actions">
+                    <div class="alert alert-warning twitter-status-alert py-2 px-3 mb-0 me-3" role="alert">
+                        <i class="fas fa-link me-1"></i>
+                        {{ translate('connect_twitter') }}
+                    </div>
+                    
+                    <!-- OAuth Twitter Login Button -->
+                    <a href="{{ url_for('twitter_login') }}" class="btn btn-primary btn-lg me-2">
+                        <i class="fab fa-twitter me-2"></i>Connect Twitter
+                    </a>
+                </div>
+                {% else %}
+                <div class="d-flex align-items-center gap-3 twitter-header-actions">
+                    <div class="alert alert-success twitter-status-alert py-2 px-3 mb-0 me-3" role="alert">
+                        <i class="fas fa-check-circle me-1"></i>
+                        {{ translate('twitter_connected') }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Information Alert -->
+            {% if protocols_with_twitter %}
+            <div class="alert alert-info">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h6 class="alert-heading mb-2">
+                            <i class="fas fa-info-circle me-2"></i>{{ translate('search_tweets_by_protocol') }}
+                        </h6>
+                        <p class="mb-2">{{ translate('latest_tweets_info') }}</p>
+                        <small>{{ translate('api_limits_info') }}</small>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <button id="searchAllTweets" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-search me-2"></i>{{ translate('search_tweets') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center">
+                <h5 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ translate('no_protocols_twitter') }}
+                </h5>
+                <p class="mb-3">{{ translate('add_twitter_message') }}</p>
+                <a href="{{ url_for('add_protocol') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>{{ translate('add_protocol') }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tweets Results -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-twitter me-2"></i>{{ translate('recent_tweets') }}
+                    </h5>
+                    <span id="tweetCount" class="badge bg-primary">0</span>
+                </div>
+                <div class="card-body">
+                    <div id="tweetsContainer">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-twitter fa-3x mb-3 opacity-50"></i>
+                            <h5>{{ translate('no_tweets_found') }}</h5>
+                            <p>{{ translate('use_buttons_search') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How it works section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info">
+                    <h6 class="mb-0 text-white">
+                        <i class="fas fa-question-circle me-2"></i>{{ translate('how_search_works') }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>{{ translate('no_artificial_limits') }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>{{ translate('quantity_info') }}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>{{ translate('config_required') }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>{{ translate('accepted_formats') }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>{{ translate('rate_limits') }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Twitter Connection Banner -->
+    {% if not has_twitter_connected %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="card-title text-warning mb-2">
+                                <i class="fab fa-twitter me-2"></i>{{ translate('connect_twitter') }}
+                            </h5>
+                            <p class="card-text mb-2">{{ translate('twitter_benefits') }}</p>
+                            <ul class="list-unstyled small">
+                                <li><i class="fas fa-check text-success me-2"></i>{{ translate('personalized_access') }}</li>
+                                <li><i class="fas fa-check text-success me-2"></i>{{ translate('more_features') }}</li>
+                                <li><i class="fas fa-check text-success me-2"></i>{{ translate('better_performance') }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <a href="{{ url_for('twitter_login') }}" class="btn btn-warning btn-lg">
+                                <i class="fab fa-twitter me-2"></i>Connect Twitter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block styles %}
+<style>
+/* Estilos personalizados para a página de busca de tweets */
+.twitter-connect-button {
+    background: linear-gradient(45deg, #1DA1F2, #0d8bd9);
+    border: none;
+    box-shadow: 0 4px 8px rgba(29, 161, 242, 0.3);
+    transition: all 0.3s ease;
+}
+
+.twitter-connect-button:hover {
+    background: linear-gradient(45deg, #0d8bd9, #1DA1F2);
+    box-shadow: 0 6px 12px rgba(29, 161, 242, 0.4);
+    transform: translateY(-2px);
+}
+
+.twitter-status-alert {
+    border-radius: 15px;
+    border: 2px solid;
+}
+
+.twitter-status-alert.alert-warning {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border-color: #f39c12;
+}
+
+.twitter-status-alert.alert-success {
+    background: linear-gradient(135deg, #d1edff, #74b9ff);
+    border-color: #0984e3;
+}
+
+.user-avatar {
+    border: 2px solid #1DA1F2;
+    box-shadow: 0 2px 4px rgba(29, 161, 242, 0.2);
+}
+
+@media (max-width: 768px) {
+    .twitter-header-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .twitter-status-alert {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-refresh da página a cada 30 segundos se houver tweets sendo buscados
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar se há mensagens de sucesso (indicando que uma busca foi feita)
+    const alerts = document.querySelectorAll('.alert-success');
+    if (alerts.length > 0) {
+        // Recarregar a página após 3 segundos para mostrar os novos tweets
+        setTimeout(function() {
+            window.location.reload();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %} 

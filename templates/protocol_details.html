@@ -283,12 +283,14 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                                                {% if airdrop.status.value == 'pendente' %}
+                                                {% if airdrop.status.value == 'pending' %}
                                     <span class="badge bg-warning">Pending</span>
-                                {% elif airdrop.status.value == 'recebido' %}
+                                {% elif airdrop.status.value == 'received' %}
                                     <span class="badge bg-info">Received</span>
-                                {% elif airdrop.status.value == 'vendido' %}
+                                {% elif airdrop.status.value == 'sold' %}
                                     <span class="badge bg-success">Sold</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ airdrop.status.value }}</span>
                                 {% endif %}
                                             </td>
                                             <td>
@@ -376,7 +378,7 @@
                             <p class="text-muted">Nenhum tweet encontrado.</p>
                             <p class="text-muted">
                                 <small>
-                                    Clique em "Update" para buscar os últimos tweets de @{{ protocol.twitter }}
+                                    Click "Update" to search for latest tweets from @{{ protocol.twitter }}
                                 </small>
                             </p>
                         </div>

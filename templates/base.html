@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="{{ get_current_language() }}" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Crypto Airdrop Manager{% endblock %}</title>
+    <title>{% block title %}Droppes - Airdrop Manager{% endblock %}</title>
     
     <!-- Bootstrap CSS with Replit theme -->
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
@@ -14,13 +14,13 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="bg-dark text-light">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-coins me-2"></i>
-                Crypto Airdrop Manager
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='img/nova_logo_droppes.svg') }}" alt="Droppes" height="32" class="me-2">
+                <span class="fw-bold">Droppes</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -28,68 +28,63 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                {% if is_authenticated %}
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('index') }}">
-                                <i class="fas fa-home me-1"></i>
-                                Protocols
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('add_protocol') }}">
-                                <i class="fas fa-plus me-1"></i>
-                                Add Protocol
-                            </a>
-                        </li>
-                    </ul>
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home me-1"></i>{{ translate('home') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('airdrop_calendar') }}">
+                            <i class="fas fa-calendar-alt me-1"></i>{{ translate('calendar') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('twitter_search') }}">
+                            <i class="fab fa-twitter me-1"></i>{{ translate('search_tweets') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('analytics_dashboard') }}">
+                            <i class="fas fa-chart-bar me-1"></i>{{ translate('analytics') }}
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <!-- Language Selector -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-globe me-1"></i>
+                            {% if get_current_language() == 'pt' %}🇧🇷 PT{% else %}🇺🇸 EN{% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item {% if get_current_language() == 'en' %}active{% endif %}" 
+                                   href="{{ url_for('set_language_route', language='en') }}">
+                                    🇺🇸 {{ translate('english') }}
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {% if get_current_language() == 'pt' %}active{% endif %}" 
+                                   href="{{ url_for('set_language_route', language='pt') }}">
+                                    🇧🇷 {{ translate('portuguese') }}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                {% if current_user.avatar_url %}
-                                    <img src="{{ current_user.avatar_url }}" alt="Avatar" class="rounded-circle me-2" style="width: 24px; height: 24px;">
-                                {% else %}
-                                    <i class="fas fa-user me-1"></i>
-                                {% endif %}
-                                {{ current_user.display_name }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <h6 class="dropdown-header">
-                                        {% if current_user.avatar_url %}
-                                            <img src="{{ current_user.avatar_url }}" alt="Avatar" class="rounded-circle me-2" style="width: 32px; height: 32px;">
-                                        {% else %}
-                                            <i class="fas fa-user-circle me-2"></i>
-                                        {% endif %}
-                                        {{ current_user.display_name }}
-                                        {% if current_user.account_type == 'twitter' %}
-                                            <br><small class="text-muted">
-                                                <i class="fab fa-twitter me-1"></i>@{{ current_user.twitter_username }}
-                                            </small>
-                                        {% endif %}
-                                    </h6>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('logout') }}">
-                                        <i class="fas fa-sign-out-alt me-2"></i>
-                                        Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                {% else %}
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login') }}">
-                                <i class="fas fa-sign-in-alt me-1"></i>
-                                Login
-                            </a>
-                        </li>
-                    </ul>
-                {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('my_account') }}">
+                            <i class="fas fa-user me-1"></i>{{ translate('my_account') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i>{{ translate('logout') }}
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -97,26 +92,20 @@
     <!-- Main Content -->
     <main class="flex-grow-1">
         <!-- Flash Messages -->
-        <div class="container mt-4">
+        <div class="container-fluid mt-3">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        {% set alert_class = 'success' %}
-                        {% set alert_icon = 'check-circle' %}
-                        
-                        {% if category == 'error' %}
-                            {% set alert_class = 'danger' %}
-                            {% set alert_icon = 'exclamation-triangle' %}
-                        {% elif category == 'warning' %}
-                            {% set alert_class = 'warning' %}
-                            {% set alert_icon = 'exclamation-circle' %}
-                        {% elif category == 'info' %}
-                            {% set alert_class = 'info' %}
-                            {% set alert_icon = 'info-circle' %}
-                        {% endif %}
-                        
-                        <div class="alert alert-{{ alert_class }} alert-dismissible fade show" role="alert">
-                            <i class="fas fa-{{ alert_icon }} me-2"></i>
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {% if category == 'success' %}
+                                <i class="fas fa-check-circle me-2"></i>
+                            {% elif category == 'error' %}
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                            {% elif category == 'info' %}
+                                <i class="fas fa-info-circle me-2"></i>
+                            {% endif %}
                             {{ message }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
@@ -129,12 +118,9 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-center py-3 mt-5">
+    <footer class="bg-secondary text-center py-3 mt-5">
         <div class="container">
-            <small class="text-muted">
-                <i class="fas fa-code me-1"></i>
-                Crypto Airdrop Manager - Track your farming protocols
-            </small>
+            <p class="mb-0">&copy; 2024 Droppes - Crypto Airdrop Manager</p>
         </div>
     </footer>
 

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Add Protocol - Crypto Airdrop Manager{% endblock %}
+{% block title %}Add Protocol - Droppes{% endblock %}
 
 {% block content %}
 <div class="container my-4">
@@ -21,8 +21,64 @@
                     <i class="fas fa-plus-circle me-2 text-info"></i>
                     Add New Protocol
                 </h1>
-                <p class="text-muted">Add a new airdrop protocol to track your farming progress</p>
+                <p class="text-muted">Add a new protocol to your serious farming arsenal</p>
             </div>
+
+            <!-- Subscription Status Alert -->
+            {% if current_user %}
+                {% if not current_user.is_premium_active() %}
+                    <div class="alert alert-warning d-flex align-items-center mb-4">
+                        <i class="fas fa-exclamation-triangle me-3 text-warning"></i>
+                        <div class="flex-grow-1">
+                            <strong>{{ current_user.get_subscription_status() }}:</strong> You can add up to {{ current_user.get_protocol_limit() }} protocols. 
+                            Currently you have {{ current_user.get_protocols_count() }}/{{ current_user.get_protocol_limit() }} protocols.
+                            <br>
+                            <small>Upgrade to Premium and get unlimited protocols starting at $2.99/month!</small>
+                        </div>
+                        <a href="{{ url_for('upgrade_page') }}" class="btn btn-warning btn-sm ms-3">
+                            <i class="fas fa-crown me-1"></i>
+                            {% if current_user.is_premium and current_user.premium_expires_at %}
+                                Renew Premium
+                            {% else %}
+                                Upgrade Premium
+                            {% endif %}
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="alert alert-success d-flex align-items-center mb-4">
+                        <i class="fas fa-crown me-3 text-success"></i>
+                        <div class="flex-grow-1">
+                            <strong>{{ current_user.get_subscription_status() }}!</strong> You can add unlimited protocols.
+                            {% if current_user.days_until_expiration() and current_user.days_until_expiration() <= 7 %}
+                                <br>
+                                <small class="text-warning">Your subscription expires in {{ current_user.days_until_expiration() }} days.</small>
+                            {% endif %}
+                        </div>
+                        {% if current_user.days_until_expiration() and current_user.days_until_expiration() <= 7 %}
+                            <a href="{{ url_for('upgrade_page') }}" class="btn btn-outline-warning btn-sm ms-3">
+                                <i class="fas fa-plus me-1"></i>
+                                Renew
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- Upgrade Alert (shown when limit reached) -->
+            {% if show_upgrade %}
+                <div class="alert alert-danger d-flex align-items-center mb-4">
+                    <i class="fas fa-ban me-3 text-danger"></i>
+                    <div class="flex-grow-1">
+                        <strong>Limit Reached!</strong> You have reached the protocol limit for free users.
+                        <br>
+                        <small>Upgrade to Premium and add unlimited protocols!</small>
+                    </div>
+                    <a href="{{ url_for('upgrade_page') }}" class="btn btn-danger btn-sm ms-3">
+                        <i class="fas fa-crown me-1"></i>
+                        Upgrade Now
+                    </a>
+                </div>
+            {% endif %}
 
             <!-- Form Card -->
             <div class="card border-secondary">
@@ -139,6 +195,73 @@
                             <div class="form-text">Check if this protocol requires daily interactions</div>
                         </div>
 
+                        <!-- Visual Customization -->
+                        <div class="card border-secondary mb-4">
+                            <div class="card-header bg-dark border-secondary">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-palette me-2"></i>
+                                    Visual Customization (Optional)
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- Logo URL -->
+                                <div class="mb-3">
+                                    <label for="logo_url" class="form-label">
+                                        <i class="fas fa-image me-1"></i>
+                                        Logo URL
+                                    </label>
+                                    <input type="url" 
+                                           class="form-control" 
+                                           id="logo_url" 
+                                           name="logo_url" 
+                                           placeholder="https://protocol.com/logo.png">
+                                    <div class="form-text">Direct link to the protocol's logo (will be shown as 24x24px)</div>
+                                </div>
+
+                                <!-- Background Image URL -->
+                                <div class="mb-3">
+                                    <label for="background_image_url" class="form-label">
+                                        <i class="fas fa-image me-1"></i>
+                                        Background Image URL
+                                    </label>
+                                    <input type="url" 
+                                           class="form-control" 
+                                           id="background_image_url" 
+                                           name="background_image_url" 
+                                           placeholder="https://protocol.com/background.jpg">
+                                    <div class="form-text">Background image for the card (will be darkened for readability)</div>
+                                </div>
+
+                                <!-- Primary Color -->
+                                <div class="mb-3">
+                                    <label for="primary_color" class="form-label">
+                                        <i class="fas fa-palette me-1"></i>
+                                        Primary Color
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="color" 
+                                               class="form-control form-control-color" 
+                                               id="primary_color" 
+                                               name="primary_color" 
+                                               value="#627eea"
+                                               style="width: 60px;">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="primary_color_text" 
+                                               placeholder="#627eea">
+                                    </div>
+                                    <div class="form-text">Choose a color that represents this protocol (defaults to network color)</div>
+                                </div>
+
+                                <div class="alert alert-info d-flex align-items-center">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    <div>
+                                        <strong>Tip:</strong> If you only enter the website URL, we'll try to automatically fetch the favicon as the logo.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Submit Buttons -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="{{ url_for('index') }}" class="btn btn-secondary">
@@ -226,6 +349,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.value = customNetwork.trim();
             } else {
                 this.value = '';
+            }
+        }
+    });
+
+    // Color picker synchronization
+    const colorPicker = document.getElementById('primary_color');
+    const colorText = document.getElementById('primary_color_text');
+    
+    colorPicker.addEventListener('input', function() {
+        colorText.value = this.value;
+    });
+    
+    colorText.addEventListener('input', function() {
+        if (this.value.match(/^#[0-9A-F]{6}$/i)) {
+            colorPicker.value = this.value;
+        }
+    });
+
+    // Auto-generate favicon URL from website
+    const websiteInput = document.getElementById('website');
+    const logoInput = document.getElementById('logo_url');
+    
+    websiteInput.addEventListener('blur', function() {
+        if (this.value && !logoInput.value) {
+            try {
+                const url = new URL(this.value);
+                const faviconUrl = `${url.protocol}//${url.hostname}/favicon.ico`;
+                logoInput.placeholder = `Auto-detected: ${faviconUrl}`;
+            } catch (e) {
+                // Invalid URL, ignore
             }
         }
     });

@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}{{ translate('upgrade_premium') }} - Droppes{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-5 mb-3">
+                <i class="fas fa-crown me-2 text-warning"></i>
+                {{ translate('choose_premium_plan') }}
+            </h1>
+            <p class="lead text-muted">{{ translate('unlock_unlimited_protocols') }}</p>
+        </div>
+    </div>
+
+    <!-- Benefits Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark text-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-star me-2"></i>
+                        {{ translate('premium_benefits') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <i class="fas fa-infinity text-success mb-2" style="font-size: 2rem;"></i>
+                            <h6>{{ translate('unlimited_protocols') }}</h6>
+                            <small class="text-muted">{{ translate('add_as_many_as_you_want') }}</small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <i class="fas fa-headset text-success mb-2" style="font-size: 2rem;"></i>
+                            <h6>{{ translate('priority_support') }}</h6>
+                            <small class="text-muted">{{ translate('preferential_service') }}</small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <i class="fas fa-tools text-success mb-2" style="font-size: 2rem;"></i>
+                            <h6>{{ translate('advanced_tools') }}</h6>
+                            <small class="text-muted">{{ translate('exclusive_features') }}</small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <i class="fas fa-shield-alt text-success mb-2" style="font-size: 2rem;"></i>
+                            <h6>{{ translate('no_commitment') }}</h6>
+                            <small class="text-muted">{{ translate('cancel_anytime') }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Plans -->
+    <div class="row mb-4">
+        {% for plan_key, plan in plans.items() %}
+        <div class="col-lg-4 mb-4">
+            <div class="card border-{% if plan_key == 'quarterly' %}warning{% elif plan_key == 'biannual' %}success{% else %}secondary{% endif %} h-100">
+                {% if plan_key == 'quarterly' %}
+                <div class="card-header bg-warning text-dark text-center">
+                    <span class="badge bg-dark mb-2">{{ translate('most_popular') }}</span>
+                    <h5 class="card-title mb-0">{{ plan.name }}</h5>
+                </div>
+                {% elif plan_key == 'biannual' %}
+                <div class="card-header bg-success text-white text-center">
+                    <span class="badge bg-light text-dark mb-2">{{ translate('best_value') }}</span>
+                    <h5 class="card-title mb-0">{{ plan.name }}</h5>
+                </div>
+                {% else %}
+                <div class="card-header bg-dark text-white text-center">
+                    <h5 class="card-title mb-0">{{ plan.name }}</h5>
+                </div>
+                {% endif %}
+                
+                <div class="card-body text-center d-flex flex-column">
+                    <div class="mb-3">
+                        <h2 class="text-{% if plan_key == 'quarterly' %}warning{% elif plan_key == 'biannual' %}success{% else %}primary{% endif %}">
+                            ${{ "%.2f"|format(plan.price) }}
+                        </h2>
+                        <small class="text-muted">
+                            {% if plan.months == 1 %}
+                                {{ translate('per_month') }}
+                            {% else %}
+                                {{ translate('one_time_payment_for', months=plan.months) }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    
+                    {% if plan.discount > 0 %}
+                    <div class="mb-3">
+                        <span class="badge bg-{% if plan_key == 'quarterly' %}warning{% else %}success{% endif %} text-dark">
+                            {{ translate('discount', discount=plan.discount) }}
+                        </span>
+                        <br>
+                        <small class="text-success">
+                            {{ translate('save_amount', amount="%.2f"|format(plan.savings)) }}
+                        </small>
+                    </div>
+                    {% endif %}
+                    
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            {{ translate('unlimited_protocols_feature') }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            {{ translate('priority_support_feature') }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            {{ translate('all_features') }}
+                        </li>
+                        {% if plan.months > 1 %}
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            {{ translate('months_access', months=plan.months) }}
+                        </li>
+                        {% endif %}
+                    </ul>
+                    
+                    <div class="mt-auto">
+                        <button type="button" 
+                                class="btn btn-{% if plan_key == 'quarterly' %}warning{% elif plan_key == 'biannual' %}success{% else %}outline-primary{% endif %} w-100"
+                                onclick="selectPlan('{{ plan_key }}', '{{ plan.name }}', '{{ plan.price }}')">
+                            {{ translate('choose_plan', plan=plan.name) }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Payment Form Card -->
+            <div class="card border-primary mb-4" id="paymentCard" style="display: none;">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-credit-card me-2"></i>
+                        {{ translate('finalize_payment') }}
+                    </h5>
+                    <small id="selectedPlanInfo"></small>
+                </div>
+                <div class="card-body">
+                    <!-- Payment Instructions -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>{{ translate('how_to_pay') }}</h6>
+                        <ol class="mb-0">
+                            <li>{{ translate('send_exact_amount') | safe }}</li>
+                            <li>{{ translate('copy_transaction_hash') }}</li>
+                            <li>{{ translate('fill_form_submit') }}</li>
+                            <li>{{ translate('await_confirmation') }}</li>
+                        </ol>
+                    </div>
+
+                    <!-- Payment Address -->
+                    <div class="card border-secondary mb-4">
+                        <div class="card-header bg-dark border-secondary">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-wallet me-2"></i>
+                                {{ translate('payment_address_solana') }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control" 
+                                       value="{{ payment_address }}" 
+                                       id="paymentAddress" 
+                                       readonly>
+                                <button class="btn btn-outline-secondary" 
+                                        type="button" 
+                                        onclick="copyToClipboard('paymentAddress')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted mt-2">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                {{ translate('accepted_only_usdc_usdt') }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form method="POST" action="{{ url_for('process_payment') }}" id="paymentForm">
+                        <input type="hidden" id="selectedPlan" name="plan" value="">
+                        
+                        <div class="mb-3">
+                            <label for="token_symbol" class="form-label">
+                                <i class="fas fa-coins me-1"></i>
+                                {{ translate('token_used') }}
+                            </label>
+                            <select class="form-select" id="token_symbol" name="token_symbol" required>
+                                <option value="USDC">USDC (USD Coin)</option>
+                                <option value="USDT">USDT (Tether)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="wallet_address" class="form-label">
+                                <i class="fas fa-wallet me-1"></i>
+                                {{ translate('your_wallet_address') }}
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="wallet_address" 
+                                   name="wallet_address" 
+                                   placeholder="{{ translate('wallet_placeholder') }}"
+                                   required>
+                            <div class="form-text">{{ translate('wallet_help_text') }}</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="transaction_hash" class="form-label">
+                                <i class="fas fa-receipt me-1"></i>
+                                {{ translate('transaction_hash') }}
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="transaction_hash" 
+                                   name="transaction_hash" 
+                                   placeholder="{{ translate('transaction_placeholder') }}"
+                                   required>
+                            <div class="form-text">
+                                {{ translate('transaction_help_text') }}
+                                <a href="https://solscan.io" target="_blank">Solscan</a>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                {{ translate('submit_for_verification') }}
+                            </button>
+                            <a href="{{ url_for('my_account') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                {{ translate('back_to_account') }}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card border-secondary">
+                <div class="card-header bg-dark border-secondary">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        {{ translate('need_help') }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>{{ translate('how_to_get_usdc_usdt') }}</strong></p>
+                    <ul class="mb-3">
+                        <li>{{ translate('use_exchanges') }}</li>
+                        <li>{{ translate('buy_and_withdraw') }}</li>
+                        <li>{{ translate('use_bridges') }}</li>
+                    </ul>
+                    
+                    <p class="mb-2"><strong>{{ translate('recommended_wallets') }}</strong></p>
+                    <ul class="mb-3">
+                        <li>{{ translate('phantom_wallet') }}</li>
+                        <li>{{ translate('solflare') }}</li>
+                        <li>{{ translate('backpack') }}</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>{{ translate('important_warning') }}</strong> {{ translate('verify_address_warning') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedPlanData = null;
+
+function selectPlan(planKey, planName, planPrice) {
+    planPrice = parseFloat(planPrice);
+    selectedPlanData = { key: planKey, name: planName, price: planPrice };
+    
+    // Update hidden field
+    document.getElementById('selectedPlan').value = planKey;
+    
+    // Update plan info display
+    document.getElementById('selectedPlanInfo').innerHTML = 'Plan ' + planName + ' - $' + planPrice.toFixed(2);
+    
+    // Show payment card
+    document.getElementById('paymentCard').style.display = 'block';
+    
+    // Scroll to payment form
+    document.getElementById('paymentCard').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+    });
+    
+    // Update all plan buttons
+    document.querySelectorAll('[onclick^="selectPlan"]').forEach(btn => {
+        btn.classList.remove('btn-warning', 'btn-success', 'btn-primary');
+        btn.classList.add('btn-outline-secondary');
+        var originalText = btn.getAttribute('data-original-text');
+        if (originalText) {
+            btn.innerHTML = originalText;
+        }
+    });
+    
+    // Highlight selected button
+    event.target.classList.remove('btn-outline-secondary');
+    if (planKey === 'quarterly') {
+        event.target.classList.add('btn-warning');
+    } else if (planKey === 'biannual') {
+        event.target.classList.add('btn-success');
+    } else {
+        event.target.classList.add('btn-primary');
+    }
+    
+    // Store original text and update button text
+    if (!event.target.getAttribute('data-original-text')) {
+        event.target.setAttribute('data-original-text', event.target.innerHTML);
+    }
+    event.target.innerHTML = '{{ translate("selected_plan") }}';
+}
+
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    element.select();
+    element.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    
+    // Show feedback
+    const button = element.nextElementSibling;
+    const originalHtml = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.remove('btn-outline-secondary');
+    button.classList.add('btn-success');
+    
+    setTimeout(() => {
+        button.innerHTML = originalHtml;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+    }, 2000);
+}
+
+// Validate form before submission
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    if (!selectedPlanData) {
+        e.preventDefault();
+        alert('{{ translate("select_plan_first") }}');
+        return false;
+    }
+});
+</script>
+{% endblock %} 
