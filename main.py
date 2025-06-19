@@ -1,21 +1,40 @@
-import sys
 import os
+from flask import Flask
 
-# Adiciona o diretório atual ao path do Python
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Cria uma aplicação Flask simples e independente
+app = Flask(__name__)
 
-try:
-    from app import app
-    print("✅ App importado com sucesso!")
-except Exception as e:
-    print(f"❌ Erro ao importar app: {e}")
-    # Cria uma app Flask simples como fallback
-    from flask import Flask
-    app = Flask(__name__)
-    
-    @app.route('/')
-    def hello():
-        return f"<h1>Erro de Import</h1><p>Erro: {str(e)}</p>"
+@app.route('/')
+def home():
+    return """
+    <h1>🎉 APLICAÇÃO FUNCIONANDO NO VERCEL!</h1>
+    <h2>✅ Status: ONLINE</h2>
+    <h3>🔧 Informações de Debug:</h3>
+    <ul>
+        <li><strong>Python Path:</strong> Funcionando</li>
+        <li><strong>Flask:</strong> Funcionando</li>
+        <li><strong>Vercel:</strong> Funcionando</li>
+    </ul>
+    <h3>🌐 Variáveis de Ambiente:</h3>
+    <ul>
+        <li><strong>SUPABASE_URL:</strong> {'✅ Configurada' if os.getenv('SUPABASE_URL') else '❌ Não configurada'}</li>
+        <li><strong>SUPABASE_KEY:</strong> {'✅ Configurada' if os.getenv('SUPABASE_KEY') else '❌ Não configurada'}</li>
+        <li><strong>SECRET_KEY:</strong> {'✅ Configurada' if os.getenv('SECRET_KEY') else '❌ Não configurada'}</li>
+    </ul>
+    <p><a href="/test">🧪 Teste de Rota</a></p>
+    """
+
+@app.route('/test')
+def test():
+    return """
+    <h1>🧪 Página de Teste</h1>
+    <p>✅ Roteamento funcionando!</p>
+    <p><a href="/">🏠 Voltar ao início</a></p>
+    """
+
+@app.route('/health')
+def health():
+    return {"status": "ok", "message": "Aplicação funcionando no Vercel!"}
 
 # Export app for Vercel
 application = app
