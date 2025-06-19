@@ -14,7 +14,8 @@ try:
     from app import app
     print("✅ App principal importado com sucesso!")
 except Exception as e:
-    print(f"❌ Erro ao importar app principal: {e}")
+    error_msg = str(e)
+    print(f"❌ Erro ao importar app principal: {error_msg}")
     print(f"📋 Traceback completo:")
     traceback.print_exc()
     
@@ -27,7 +28,7 @@ except Exception as e:
     def error_page():
         return f"""
         <h1>❌ Erro de Import</h1>
-        <p><strong>Erro:</strong> {str(e)}</p>
+        <p><strong>Erro:</strong> {str(error_msg)}</p>
         <p><strong>Traceback:</strong> {traceback.format_exc()}</p>
         <p><strong>Environment:</strong> {'Render' if os.getenv('RENDER') else 'Local'}</p>
         <p><strong>Python Path:</strong> {sys.path[0]}</p>
