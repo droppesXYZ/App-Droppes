@@ -53,6 +53,40 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Lista de Protocolos -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-list me-2"></i>{{ translate('your_protocols') }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for protocol in protocols_with_twitter %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card border">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title mb-2">{{ protocol.name }}</h6>
+                                            <p class="card-text small text-muted mb-2">
+                                                <i class="fab fa-twitter me-1"></i>@{{ protocol.twitter }}
+                                            </p>
+                                            <form method="POST" action="{{ url_for('search_protocol_tweets', protocol_id=protocol.id) }}" class="d-inline">
+                                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                                    <i class="fas fa-search me-1"></i>{{ translate('search_tweets') }}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% else %}
             <div class="alert alert-warning text-center">
                 <h5 class="alert-heading">
@@ -214,15 +248,22 @@
 
 {% block scripts %}
 <script>
-// Auto-refresh da página a cada 30 segundos se houver tweets sendo buscados
+// Funcionalidade de busca de tweets
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar se há mensagens de sucesso (indicando que uma busca foi feita)
-    const alerts = document.querySelectorAll('.alert-success');
-    if (alerts.length > 0) {
-        // Recarregar a página após 3 segundos para mostrar os novos tweets
-        setTimeout(function() {
-            window.location.reload();
-        }, 3000);
+    const searchAllButton = document.getElementById('searchAllTweets');
+    
+    if (searchAllButton) {
+        searchAllButton.addEventListener('click', function() {
+            // Adicionar loading state
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ translate("searching") }}...';
+            this.disabled = true;
+            
+            // Simular busca (pode ser implementado via AJAX no futuro)
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-search me-2"></i>{{ translate("search_tweets") }}';
+                this.disabled = false;
+            }, 2000);
+        });
     }
 });
 </script>

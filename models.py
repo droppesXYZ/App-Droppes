@@ -42,6 +42,10 @@ class SubscriptionPlan(Enum):
     QUARTERLY = "quarterly"
     BIANNUAL = "biannual"
 
+class UserRole(Enum):
+    USER = "user"
+    ADMIN = "admin"
+
 class User(db.Model):
     __tablename__ = 'users'
     
@@ -49,6 +53,9 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=True)  # Pode ser None para login social
     password_hash = db.Column(db.String(200), nullable=True)  # Pode ser None para login social
+    
+    # User role for permissions
+    role = db.Column(db.Enum(UserRole), default=UserRole.USER, nullable=False)
     
     # Twitter OAuth fields
     twitter_id = db.Column(db.String(50), unique=True, nullable=True)
@@ -64,6 +71,10 @@ class User(db.Model):
     
     # Account type
     account_type = db.Column(db.String(20), default='email')  # 'email' or 'twitter'
+    
+    # Login tracking
+    last_login_ip = db.Column(db.String(45), nullable=True)
+    last_login_at = db.Column(db.DateTime, nullable=True)
     
     # Premium subscription fields
     is_premium = db.Column(db.Boolean, default=False)
@@ -137,12 +148,21 @@ class User(db.Model):
     
     def get_protocol_limit(self):
         """Get protocol limit based on subscription status"""
-        return None if self.is_premium_active() else 3  # None = unlimited, 3 = free limit
+        # Apenas admins têm protocolos ilimitados
+        if self.is_admin():
+            return None
+        # Usuários normais: premium = ilimitado, free = 3 protocolos
+        return None if self.is_premium_active() else 3
     
     def can_add_protocol(self):
         """Check if user can add more protocols"""
+        # Admins podem adicionar protocolos ilimitados
+        if self.is_admin():
+            return True
+        # Usuários premium podem adicionar protocolos ilimitados
         if self.is_premium_active():
             return True
+        # Usuários free limitados a 3 protocolos
         return len(self.protocols) < 3
     
     def get_protocols_count(self):
@@ -195,6 +215,27 @@ class User(db.Model):
         if not self.is_premium_active():
             return 0
         return (self.premium_expires_at - datetime.utcnow()).days
+    
+    def is_admin(self):
+        """Check if user has admin role"""
+        return self.role == UserRole.ADMIN
+    
+    def make_admin(self):
+        """Promote user to admin"""
+        self.role = UserRole.ADMIN
+        # Admins automaticamente têm premium vitalício
+        self.is_premium = True
+        self.premium_expires_at = None  # Vitalício
+        
+    def make_user(self):
+        """Change user role to user"""
+        self.role = UserRole.USER
+
+    
+    def update_login_info(self, ip_address):
+        """Update last login information"""
+        self.last_login_ip = ip_address
+        self.last_login_at = datetime.utcnow()
     
     def __repr__(self):
         return f'<User {self.username}>'

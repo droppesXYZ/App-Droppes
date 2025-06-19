@@ -17,14 +17,7 @@
                             <p class="login-subtitle" id="formSubtitle">Sign in to your account</p>
                         </div>
 
-                    <!-- Twitter API Status Alert -->
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>API do Twitter está temporariamente sobrecarregada.</strong>
-                        Aguarde 15-30 minutos e tente novamente. Dica: Use o verificador 
-                        de status para saber quando estará disponível.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
+
 
                     <!-- Flash Messages -->
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -47,7 +40,8 @@
                                         <i class="fas fa-user me-2"></i>Username
                                     </label>
                                     <input type="text" class="form-control form-control-lg" id="username" name="username" required 
-                                           placeholder="Enter your username" autocomplete="username">
+                                           placeholder="Enter your username" autocomplete="username" 
+                                           value="{{ username or '' }}">
                                 </div>
                                 
                                 <div class="mb-4">
@@ -56,15 +50,19 @@
                                     </label>
                                     <div class="input-group">
                                         <input type="password" class="form-control form-control-lg" id="password" name="password" required 
-                                               placeholder="Enter your password" autocomplete="current-password">
+                                               placeholder="Enter your password" autocomplete="current-password"
+                                               value="{{ password or '' }}">
                                         <button type="button" class="btn password-toggle" onclick="togglePassword()">
                                             <i class="fas fa-eye" id="toggleIcon"></i>
                                         </button>
                                     </div>
                                 </div>
 
+
+
                                 <div class="mb-4 form-check">
-                                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                    <input type="checkbox" class="form-check-input" id="remember" name="remember" 
+                                           {% if remember %}checked{% endif %}>
                                     <label class="form-check-label" for="remember">
                                         Remember me
                                     </label>
@@ -125,15 +123,10 @@
                         <!-- Social Login -->
                         <div class="social-login mt-4">
                             <div class="divider">
-                                <span>ou</span>
+                                <span>or</span>
                             </div>
                             
-                            <!-- Twitter Login Status -->
-                            <div class="alert alert-info p-2 mb-3" style="font-size: 0.85rem;">
-                                <i class="fas fa-rocket me-1"></i>
-                                <strong>Login Twitter Aprimorado!</strong> 
-                                Funciona mesmo durante rate limits da API. Login sempre garantido! 🚀
-                            </div>
+
                             
                             <div class="d-grid">
                                 <a href="{{ url_for('twitter_login') }}" class="btn btn-twitter btn-lg">
@@ -142,9 +135,9 @@
                                 <div class="mt-2 text-center">
                                     <small class="text-muted">
                                         <i class="fas fa-tools me-1"></i>
-                                        Ferramentas: 
+                                        Tools: 
                                         <a href="/auth/twitter/status" target="_blank" class="text-decoration-none text-info">
-                                            <strong>Status API</strong>
+                                            <strong>API Status</strong>
                                         </a> • 
                                         <a href="/auth/twitter/reset" class="text-decoration-none text-warning">
                                             <strong>Reset OAuth</strong>

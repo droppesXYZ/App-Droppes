@@ -7,6 +7,10 @@
     --accent-purple: #8b5cf6;
     --droppes-primary: #2563eb;
     --droppes-secondary: #10b981;
+    /* Nova paleta de cores para o cabeçalho */
+    --header-primary: #1a1f36;
+    --header-secondary: #2d3561;
+    --header-accent: #4f46e5;
 }
 
 /* Droppes Logo Styling */
@@ -39,17 +43,7 @@ body {
     background: var(--bs-dark);
 }
 
-/* Navigation enhancements */
-.navbar-brand {
-    font-weight: 600;
-    font-size: 1.25rem;
-    padding: 0.5rem 0;
-    text-decoration: none !important;
-}
-
-.navbar-brand:hover {
-    text-decoration: none !important;
-}
+/* Navigation enhancements - Substituído por estilo moderno mais acima */
 
 .navbar-brand i {
     color: var(--crypto-gold);
@@ -202,6 +196,264 @@ footer {
     .btn-lg {
         padding: 0.75rem 1.5rem;
         font-size: 1rem;
+    }
+    
+    /* Melhorias específicas para mobile */
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* Cards em mobile */
+    .protocol-card .card-body {
+        padding: 1rem !important;
+    }
+    
+    /* Logo principal menor em mobile */
+    .text-center img[alt="Droppes Logo"] {
+        height: 80px !important;
+        margin-bottom: 1rem;
+    }
+    
+    /* Ajustar botões em mobile */
+    .btn-group .btn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    /* Navbar melhorado para mobile */
+    .navbar-brand span {
+        font-size: 1.1rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.7rem 1rem;
+        text-align: center;
+    }
+    
+    /* Filtros responsivos */
+    .row.g-3 .col-md-4 {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Stats responsivos */
+    .border-end {
+        font-size: 0.9rem;
+    }
+    
+    /* Dropdown em mobile */
+    .dropdown-menu {
+        min-width: 150px;
+        font-size: 0.9rem;
+    }
+    
+    /* Campos de formulário maiores */
+    .form-control, .form-select {
+        font-size: 16px; /* Evita zoom automático no iOS */
+        padding: 0.75rem;
+        min-height: 44px;
+    }
+    
+    /* Labels mais visíveis */
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Modais responsivos */
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-header {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal-footer {
+        padding: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Tabelas responsivas */
+    .table-responsive {
+        border: none;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .table td, .table th {
+        padding: 0.5rem;
+        vertical-align: middle;
+    }
+    
+    /* Alerts em mobile */
+    .alert {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Badges em mobile */
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    /* Cards de estatísticas */
+    .row.text-center .col-4 {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .row.text-center small {
+        font-size: 0.75rem;
+    }
+    
+    .row.text-center strong {
+        font-size: 0.9rem;
+    }
+}
+
+/* Media query adicional para smartphones pequenos */
+@media (max-width: 480px) {
+    /* Container ainda mais compacto */
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    /* Cards ocupam largura total */
+    .col-md-6, .col-lg-4 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    .protocol-card .card-body {
+        padding: 0.8rem !important;
+    }
+    
+    /* Logo ainda menor */
+    .text-center img[alt="Droppes Logo"] {
+        height: 60px !important;
+    }
+    
+    /* Título menor */
+    .display-6 {
+        font-size: 1.5rem;
+    }
+    
+    /* Botões menores */
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+    }
+    
+    /* Network badges menores */
+    .network-badge {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+    
+    /* Status badges mais compactos */
+    .status-badge, .daily-missions-badge {
+        font-size: 0.6rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    /* Navbar brand menor */
+    .navbar-brand img {
+        height: 28px !important;
+    }
+    
+    /* Cards com menos espaçamento */
+    .row.g-4 {
+        gap: 0.75rem !important;
+    }
+    
+    /* Footer mais compacto */
+    footer {
+        font-size: 0.9rem;
+        padding: 1rem 0 !important;
+    }
+}
+
+/* Media query para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: 95%;
+    }
+    
+    .col-lg-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    .protocol-card .card-body {
+        padding: 1.2rem;
+    }
+}
+
+/* Melhorias gerais de touch para mobile */
+@media (hover: none) and (pointer: coarse) {
+    /* Aumentar área de toque para botões */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .btn-sm {
+        min-height: 36px;
+    }
+    
+    /* Links e botões maiores */
+    .nav-link, .dropdown-item {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Remover hover effects em touch devices */
+    .card:hover,
+    .protocol-card:hover,
+    .btn:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Focus states mais visíveis */
+    .btn:focus,
+    .form-control:focus,
+    .nav-link:focus {
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+        outline: none;
+    }
+}
+
+/* Orientação landscape em mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    /* Logo ainda menor em landscape */
+    .text-center img[alt="Droppes Logo"] {
+        height: 50px !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Reduzir padding vertical */
+    .container.my-4 {
+        margin-top: 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Navbar mais compacto */
+    .navbar {
+        padding: 0.25rem 0;
     }
 }
 
@@ -820,4 +1072,376 @@ a {
 
 a:hover {
     color: #4f6bd8;
+}
+
+/* Novo estilo moderno para o cabeçalho */
+.navbar.bg-primary {
+    background: linear-gradient(135deg, var(--header-primary) 0%, var(--header-secondary) 50%, var(--header-accent) 100%) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar.bg-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+    pointer-events: none;
+}
+
+/* Melhorar a aparência dos links do navbar */
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.navbar-dark .navbar-nav .nav-link:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Melhorar o brand/logo */
+.navbar-brand {
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem !important;
+    border-radius: 0.5rem;
+}
+
+.navbar-brand:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.02);
+}
+
+/* Dropdown menu styling */
+.dropdown-menu {
+    background: rgba(26, 31, 54, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-item {
+    color: rgba(255, 255, 255, 0.9);
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(79, 70, 229, 0.2);
+    color: #ffffff;
+}
+
+.dropdown-item.active {
+    background: var(--header-accent);
+    color: #ffffff;
+}
+
+/* Melhorias para telas muito pequenas */
+@media (max-width: 360px) {
+    /* Ultra compacto para telas pequenas */
+    .container {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    
+    .card-body {
+        padding: 0.6rem !important;
+    }
+    
+    .btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .navbar-brand span {
+        font-size: 1rem;
+    }
+    
+    /* Ocultar elementos menos importantes */
+    .text-muted.mb-0 {
+        display: none;
+    }
+    
+    /* Simplificar layout de cards */
+    .protocol-card .d-flex.gap-2 {
+        flex-direction: column;
+        gap: 0.5rem !important;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem !important;
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Otimizações para performance em mobile */
+@media (max-width: 768px) {
+    /* Reduzir animações em mobile para economizar bateria */
+    *, *::before, *::after {
+        animation-duration: 0.2s !important;
+        transition-duration: 0.2s !important;
+    }
+    
+    /* Simplificar sombras */
+    .card {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Remover efeitos pesados */
+    .navbar.bg-primary::before {
+        display: none;
+    }
+    
+    .navbar.bg-primary {
+        backdrop-filter: none;
+    }
+}
+
+/* Acessibilidade em mobile */
+@media (max-width: 768px) {
+    /* Melhor contraste */
+    .text-muted {
+        color: #adb5bd !important;
+    }
+    
+    /* Foco mais visível */
+    .btn:focus,
+    .form-control:focus,
+    .form-select:focus {
+        outline: 2px solid #4f46e5;
+        outline-offset: 2px;
+    }
+    
+    /* Skip links para navegação por teclado */
+    .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 6px;
+        background: #4f46e5;
+        color: white;
+        padding: 8px;
+        text-decoration: none;
+        z-index: 9999;
+    }
+    
+    .skip-link:focus {
+        top: 6px;
+    }
+}
+
+/* Account Settings Forms */
+.card .card-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.form-control.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.input-group .btn {
+    border-color: var(--border-color);
+}
+
+.card-body .form-text {
+    margin-top: 0.5rem;
+}
+
+.account-settings .card {
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.account-settings .card-body {
+    padding: 1.5rem;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Form Validation Feedback */
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #dc3545;
+}
+
+.form-control:invalid {
+    border-color: #dc3545;
+}
+
+.form-control:valid {
+    border-color: #28a745;
+}
+
+/* Password strength indicator */
+.password-strength {
+    height: 4px;
+    margin-top: 0.5rem;
+    border-radius: 2px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    width: 0%;
+}
+
+.password-strength-weak {
+    background-color: #dc3545;
+}
+
+.password-strength-medium {
+    background-color: #ffc107;
+}
+
+.password-strength-strong {
+    background-color: #28a745;
+}
+
+/* Premium Upgrade Styling */
+.premium-highlight {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
+    border: 2px solid #ffc107 !important;
+    box-shadow: 0 8px 32px rgba(255, 193, 7, 0.2);
+    animation: premiumGlow 3s ease-in-out infinite alternate;
+}
+
+.premium-active {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%);
+    border: 2px solid #28a745 !important;
+}
+
+@keyframes premiumGlow {
+    from {
+        box-shadow: 0 8px 32px rgba(255, 193, 7, 0.2);
+    }
+    to {
+        box-shadow: 0 12px 40px rgba(255, 193, 7, 0.3);
+    }
+}
+
+.premium-icon {
+    animation: crownBounce 2s ease-in-out infinite;
+}
+
+@keyframes crownBounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.premium-feature {
+    transition: transform 0.3s ease;
+}
+
+.premium-feature:hover {
+    transform: translateY(-5px);
+}
+
+/* Account Settings Collapsible */
+.card-header .btn-link {
+    color: var(--bs-light) !important;
+    font-weight: 600;
+}
+
+.card-header .btn-link:hover {
+    color: var(--primary-color) !important;
+}
+
+.card-header .btn-link .fas.fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.card-header .btn-link[aria-expanded="true"] .fas.fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.card-header {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Account Settings Animation */
+.collapse.show {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Optimizations for Premium Card */
+@media (max-width: 768px) {
+    .premium-highlight .row.text-center .col-4 {
+        margin-bottom: 1rem;
+    }
+    
+    .premium-feature small {
+        font-size: 0.75rem;
+    }
+    
+    .premium-highlight .btn-lg {
+        font-size: 1rem;
+        padding: 0.75rem 2rem;
+    }
+    
+    .premium-icon .fa-3x {
+        font-size: 2rem !important;
+    }
+    
+    .premium-feature .fa-2x {
+        font-size: 1.5rem !important;
+    }
 }

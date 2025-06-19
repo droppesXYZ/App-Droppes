@@ -1,8 +1,7 @@
 import os
 import logging
-import time
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
-from datetime import datetime, date
+from datetime import datetime, timedelta
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, g
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
 from authlib.integrations.flask_client import OAuth
@@ -440,11 +439,24 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "crypto_airdrop_manager_secret_key_2025")
 
 # Configure session
-from datetime import timedelta
 app.permanent_session_lifetime = timedelta(days=7)  # Remember me for 7 days
 app.config['SESSION_COOKIE_SECURE'] = False  # Para desenvolvimento local
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+
+
+def get_client_ip():
+    """Get client IP address from request"""
+    if request.environ.get('HTTP_X_FORWARDED_FOR'):
+        # If behind a proxy
+        return request.environ['HTTP_X_FORWARDED_FOR'].split(',')[0].strip()
+    elif request.environ.get('HTTP_X_REAL_IP'):
+        # If behind nginx
+        return request.environ['HTTP_X_REAL_IP']
+    else:
+        # Direct connection
+        return request.environ.get('REMOTE_ADDR')
 
 # Adicionar funções de tradução ao contexto global dos templates
 @app.context_processor
@@ -531,73 +543,129 @@ db_url = setup_database()
 # Initialize the app with the extension
 db.init_app(app)
 
-# Create tables with robust fallback system
-def init_database_with_fallback():
-    """Initialize database with automatic fallback"""
-    global db_url
-    with app.app_context():
-        max_retries = 2
-        retry_count = 0
+# Medidas de segurança do banco de dados
+def check_database_exists(url):
+    """Verifica se o banco de dados já tem dados importantes"""
+    try:
+        import sqlalchemy
+        engine = sqlalchemy.create_engine(url, connect_args={"connect_timeout": 5})
+        with engine.connect() as conn:
+            # Verificar se existem tabelas com dados
+            result = conn.execute(sqlalchemy.text(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
+                if url.startswith('sqlite://') else
+                "SELECT table_name FROM information_schema.tables WHERE table_name='users'"
+            ))
+            tables = result.fetchall()
+            
+            if tables:
+                # Verificar se há usuários no banco
+                try:
+                    result = conn.execute(sqlalchemy.text("SELECT COUNT(*) FROM users"))
+                    user_count = result.scalar()
+                    if user_count > 0:
+                        print(f"🛡️ Banco protegido: {user_count} usuários encontrados")
+                        return True
+                except:
+                    pass
+        engine.dispose()
+    except:
+        pass
+    return False
+
+def safe_create_tables():
+    """Cria tabelas apenas se não existirem dados importantes"""
+    try:
+        # Primeiro tenta conectar e verificar se há dados
+        current_url = app.config["SQLALCHEMY_DATABASE_URI"]
         
-        while retry_count < max_retries:
-            try:
-                # Test database connection first
-                if db_url.startswith('postgresql://'):
-                    # Quick test with shorter timeout
-                    import sqlalchemy
-                    engine = sqlalchemy.create_engine(
-                        db_url, 
-                        connect_args={"connect_timeout": 3},
-                        pool_pre_ping=True
-                    )
+        # Se há dados existentes, NÃO recriar as tabelas
+        if check_database_exists(current_url):
+            print("✅ Banco de dados protegido - usando dados existentes")
+            return True
+        
+        # Se não há dados, é seguro criar/recriar as tabelas
+        print("🔧 Criando esquema do banco de dados...")
+        db.create_all()
+        print("✅ Esquema criado com sucesso!")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Erro ao criar esquema: {str(e)}")
+        return False
+
+# Sistema de inicialização seguro do banco
+def init_database_with_fallback():
+    """Inicialização segura do banco com proteção contra perda de dados"""
+    global db_url
+    
+    with app.app_context():
+        try:
+            # Testar conexão principal (Supabase)
+            if db_url.startswith('postgresql://'):
+                import sqlalchemy
+                engine = sqlalchemy.create_engine(
+                    db_url, 
+                    connect_args={"connect_timeout": 5},
+                    pool_pre_ping=True
+                )
+                
+                try:
                     with engine.connect() as conn:
                         conn.execute(sqlalchemy.text("SELECT 1"))
-                        conn.close()
                     engine.dispose()
-                
-                # If connection test passes, create tables
-                db.create_all()
-                if db_url.startswith('postgresql://'):
-                    print("✅ Conectado ao Supabase com sucesso!")
-                else:
-                    print("✅ Conectado ao SQLite local com sucesso!")
-                return True
-                
-            except Exception as e:
-                print(f"❌ Tentativa {retry_count + 1} falhou: {str(e)}")
-                
-                if db_url.startswith('postgresql://') and retry_count < max_retries - 1:
-                    print("🔄 Fallback para SQLite devido a problemas de conectividade...")
-                    # Force SQLite fallback
-                    db_url = "sqlite:///app.db"
+                    
+                    # Conexão bem-sucedida, criar tabelas com segurança
+                    if safe_create_tables():
+                        print("✅ Conectado ao Supabase com sucesso!")
+                        return True
+                        
+                except Exception as e:
+                    print(f"⚠️ Problemas com Supabase: {str(e)}")
+                    engine.dispose()
+                    
+                    # Fallback para SQLite local
+                    print("🔄 Usando SQLite local como backup...")
+                    db_url = "sqlite:///backup_app.db"
                     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
                     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {}
-                    
-                    # Create new db instance
-                    try:
-                        db.init_app(app)
-                    except:
-                        pass  # May already be initialized
-                    
-                    retry_count += 1
-                else:
-                    print(f"❌ Erro crítico na inicialização do banco: {str(e)}")
-                    if retry_count == max_retries - 1:
-                        # Last attempt - force SQLite
-                        try:
-                            db_url = "sqlite:///fallback.db"
-                            app.config["SQLALCHEMY_DATABASE_URI"] = db_url
-                            app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {}
-                            db.init_app(app)
-                            db.create_all()
-                            print("✅ Conectado ao SQLite de emergência!")
-                            return True
-                        except Exception as final_error:
-                            print(f"❌ Falha total na inicialização: {str(final_error)}")
-                            raise final_error
-                    retry_count += 1
+            
+            # Para SQLite (backup ou principal)
+            if safe_create_tables():
+                print("✅ Conectado ao SQLite local com sucesso!")
+                return True
+            
+        except Exception as e:
+            print(f"❌ Erro crítico: {str(e)}")
+            # Último recurso - criar banco de emergência
+            emergency_db = "sqlite:///emergency_backup.db"
+            app.config["SQLALCHEMY_DATABASE_URI"] = emergency_db
+            app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {}
+            
+            try:
+                db.create_all()
+                print("🚨 Usando banco de emergência!")
+                return True
+            except Exception as final_error:
+                print(f"💥 Falha total: {str(final_error)}")
+                raise final_error
         
         return False
+
+# Inicializar sistema de backup automático
+try:
+    from backup_manager import BackupManager
+    backup_manager = BackupManager()
+    
+    # Verificar se há backups ou criar um backup inicial
+    current_db = app.config["SQLALCHEMY_DATABASE_URI"]
+    if current_db.startswith('sqlite:///'):
+        db_file = current_db.replace('sqlite:///', '')
+        backup_manager.auto_backup_if_needed(db_file)
+        print("🛡️ Sistema de backup ativo!")
+    
+except Exception as e:
+    print(f"⚠️ Sistema de backup não pôde ser inicializado: {str(e)}")
 
 # Initialize database
 init_database_with_fallback()
@@ -626,16 +694,78 @@ def is_authenticated():
     return auth_status
 
 def get_current_user():
-    """Get current logged in user"""
+    """Get current logged in user with enhanced security checks"""
     if 'user_id' in session:
         user_id = session['user_id']
-        user = User.query.get(user_id)
-        if not user:
-            logging.warning(f"Usuário ID {user_id} não encontrado no banco, limpando sessão")
+        username = session.get('username')
+        
+        # 🔒 SECURITY CHECK: Validate session integrity
+        if not user_id or not isinstance(user_id, int):
+            logging.warning(f"⚠️ SECURITY: Invalid user_id in session: {user_id}")
             session.clear()
             return None
+            
+        user = User.query.get(user_id)
+        if not user:
+            logging.warning(f"⚠️ SECURITY: User ID {user_id} not found in database, clearing session")
+            session.clear()
+            return None
+            
+        # 🔒 SECURITY CHECK: Verify session username matches database
+        if username and user.username != username:
+            logging.warning(f"⚠️ SECURITY: Session username mismatch! Session: '{username}' vs DB: '{user.username}' for user ID {user_id}")
+            session.clear()
+            return None
+            
+        # 🔒 SECURITY CHECK: Log user access for audit trail
+        logging.debug(f"✅ SECURITY: Valid user session - ID: {user.id}, Username: {user.username}")
+        
         return user
     return None
+
+def verify_protocol_ownership(protocol_id, current_user):
+    """
+    🔒 SECURITY FUNCTION: Verify that the current user owns the specified protocol
+    Returns the protocol if owned by user, None otherwise
+    """
+    if not current_user:
+        logging.warning(f"⚠️ SECURITY: Protocol access attempt without authentication - Protocol ID: {protocol_id}")
+        return None
+        
+    protocol = Protocol.query.filter_by(id=protocol_id, user_id=current_user.id).first()
+    
+    if not protocol:
+        # Check if protocol exists at all (to differentiate between non-existent and unauthorized)
+        protocol_exists = Protocol.query.get(protocol_id)
+        if protocol_exists:
+            logging.warning(f"⚠️ SECURITY: User {current_user.id} ({current_user.username}) attempted to access protocol {protocol_id} owned by user {protocol_exists.user_id}")
+        else:
+            logging.warning(f"⚠️ SECURITY: User {current_user.id} ({current_user.username}) attempted to access non-existent protocol {protocol_id}")
+        return None
+        
+    logging.debug(f"✅ SECURITY: Protocol ownership verified - User {current_user.id} owns protocol {protocol_id} ({protocol.name})")
+    return protocol
+
+def get_user_protocols_secure(current_user):
+    """
+    🔒 SECURITY FUNCTION: Get all protocols for current user with extra verification
+    """
+    if not current_user:
+        logging.warning(f"⚠️ SECURITY: Protocol list request without authentication")
+        return []
+        
+    protocols = Protocol.query.filter_by(user_id=current_user.id).all()
+    
+    # 🔒 SECURITY CHECK: Verify all returned protocols actually belong to the user
+    verified_protocols = []
+    for protocol in protocols:
+        if protocol.user_id == current_user.id:
+            verified_protocols.append(protocol)
+        else:
+            logging.error(f"🚨 CRITICAL SECURITY ISSUE: Protocol {protocol.id} has user_id {protocol.user_id} but was returned for user {current_user.id}")
+            
+    logging.debug(f"✅ SECURITY: Returned {len(verified_protocols)} verified protocols for user {current_user.id}")
+    return verified_protocols
 
 # Make authentication status available in templates
 @app.context_processor
@@ -672,34 +802,40 @@ def handle_login():
     logging.info(f"Tentativa de login para usuário: {username}")
     
     if not username or not password:
-        flash('Please enter both username and password.', 'error')
+        flash('Por favor, insira usuário e senha.', 'error')
         return render_template('login.html')
     
     # Check credentials in database
     user = User.query.filter_by(username=username).first()
     
-    if user and user.check_password(password):
-        session['user_id'] = user.id
-        session['username'] = user.username
-        session.permanent = remember
-        
-        logging.info(f"Login bem-sucedido para usuário: {username} (ID: {user.id})")
-        logging.info(f"Sessão criada: user_id={session.get('user_id')}")
-        
-        flash(f'Welcome back, {user.username}!', 'success')
-        
-        # Redirect to next page if specified, otherwise go to index
-        next_page = request.args.get('next')
-        if next_page and next_page != url_for('login'):
-            logging.info(f"Redirecionando para: {next_page}")
-            return redirect(next_page)
-        
-        logging.info("Redirecionando para index")
-        return redirect(url_for('index'))
-    else:
+    if not user or not user.check_password(password):
         logging.warning(f"Falha no login para usuário: {username}")
-        flash('Invalid username or password.', 'error')
+        flash('Usuário ou senha inválidos.', 'error')
         return render_template('login.html')
+    
+    # Login successful - create session
+    session['user_id'] = user.id
+    session['username'] = user.username
+    session.permanent = remember
+    
+    # Update login information
+    client_ip = get_client_ip()
+    user.update_login_info(client_ip)
+    db.session.commit()
+    
+    logging.info(f"Login bem-sucedido para usuário: {username} (ID: {user.id}) from IP: {client_ip}")
+    logging.info(f"Sessão criada: user_id={session.get('user_id')}")
+    
+    flash(f'Bem-vindo de volta, {user.username}!', 'success')
+    
+    # Redirect to next page if specified, otherwise go to index
+    next_page = request.args.get('next')
+    if next_page and next_page != url_for('login'):
+        logging.info(f"Redirecionando para: {next_page}")
+        return redirect(next_page)
+    
+    logging.info("Redirecionando para index")
+    return redirect(url_for('index'))
 
 def handle_register():
     """Handle registration form submission"""
@@ -1090,7 +1226,7 @@ def add_protocol():
             if primary_color and not primary_color.startswith('#'):
                 primary_color = '#' + primary_color
             
-            # Create new protocol
+            # 🔒 SECURITY: Create new protocol with explicit user verification
             protocol = Protocol(
                 user_id=current_user.id,
                 name=name,
@@ -1106,6 +1242,9 @@ def add_protocol():
             
             db.session.add(protocol)
             db.session.commit()
+            
+            # 🔒 SECURITY: Log protocol creation for audit trail
+            logging.info(f"✅ SECURITY: Protocol '{name}' created successfully by user {current_user.id} ({current_user.username})")
             
             flash(f'Protocol "{name}" added successfully!', 'success')
             return redirect(url_for('index'))
@@ -1233,21 +1372,120 @@ def edit_protocol(protocol_id):
 @app.route('/account')
 @login_required
 def my_account():
-    """User account management page"""
+    """Show user account information"""
     current_user = get_current_user()
     if not current_user:
         return redirect(url_for('login'))
     
-    # Get payment history
-    payments = Payment.query.filter_by(user_id=current_user.id).order_by(Payment.created_at.desc()).all()
-    
-    # Calculate user statistics
-    protocol_count = Protocol.query.filter_by(user_id=current_user.id).count()
+    # Create user stats object
     user_stats = {
-        'protocol_count': protocol_count
+        'protocol_count': len(current_user.protocols),
+        'limit': current_user.get_protocol_limit()
     }
     
-    return render_template('my_account.html', user=current_user, payments=payments, user_stats=user_stats)
+    return render_template('my_account.html', 
+                         user=current_user,
+                         user_stats=user_stats,
+                         protocols_count=len(current_user.protocols),
+                         limit=current_user.get_protocol_limit())
+
+@app.route('/account/update_email', methods=['POST'])
+@login_required
+def update_email():
+    """Update user email"""
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return redirect(url_for('login'))
+        
+        new_email = request.form.get('email', '').strip()
+        
+        # Validar email
+        if new_email:
+            import re
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, new_email):
+                flash('Email inválido. Por favor, digite um email válido.', 'error')
+                return redirect(url_for('my_account'))
+            
+            # Verificar se email já está em uso por outro usuário
+            existing_user = User.query.filter(
+                User.email == new_email,
+                User.id != current_user.id
+            ).first()
+            
+            if existing_user:
+                flash('Este email já está em uso por outro usuário.', 'error')
+                return redirect(url_for('my_account'))
+        
+        # Atualizar email
+        current_user.email = new_email if new_email else None
+        db.session.commit()
+        
+        if new_email:
+            flash(f'Email atualizado com sucesso para: {new_email}', 'success')
+        else:
+            flash('Email removido com sucesso.', 'success')
+            
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error updating email: {str(e)}")
+        flash('Erro ao atualizar email. Tente novamente.', 'error')
+    
+    return redirect(url_for('my_account'))
+
+@app.route('/account/change_password', methods=['POST'])
+@login_required
+def change_password():
+    """Change user password"""
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return redirect(url_for('login'))
+        
+        current_password = request.form.get('current_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        # Validações
+        if not current_password or not new_password or not confirm_password:
+            flash('Todos os campos são obrigatórios.', 'error')
+            return redirect(url_for('my_account'))
+        
+        # Verificar senha atual
+        if not current_user.check_password(current_password):
+            flash('Senha atual incorreta.', 'error')
+            return redirect(url_for('my_account'))
+        
+        # Verificar se as novas senhas coincidem
+        if new_password != confirm_password:
+            flash('A nova senha e confirmação não coincidem.', 'error')
+            return redirect(url_for('my_account'))
+        
+        # Verificar comprimento mínimo
+        if len(new_password) < 6:
+            flash('A nova senha deve ter pelo menos 6 caracteres.', 'error')
+            return redirect(url_for('my_account'))
+        
+        # Verificar se a nova senha é diferente da atual
+        if current_user.check_password(new_password):
+            flash('A nova senha deve ser diferente da senha atual.', 'error')
+            return redirect(url_for('my_account'))
+        
+        # Atualizar senha
+        current_user.set_password(new_password)
+        db.session.commit()
+        
+        flash('Senha alterada com sucesso!', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error changing password: {str(e)}")
+        flash('Erro ao alterar senha. Tente novamente.', 'error')
+    
+    return redirect(url_for('my_account'))
+
+
 
 @app.route('/upgrade')
 @login_required
@@ -1385,8 +1623,8 @@ def admin_payments():
     if not current_user:
         return redirect(url_for('login'))
     
-    # Verificar se o usuário é admin (apenas 'admin' pode acessar)
-    if current_user.username != 'admin':
+    # Verificar se o usuário é admin
+    if not current_user.is_admin():
         flash('Acesso negado. Apenas administradores podem acessar esta página.', 'error')
         return redirect(url_for('index'))
     
@@ -1400,7 +1638,7 @@ def verify_payment(payment_id):
     """Manually verify a payment (admin function)"""
     try:
         current_user = get_current_user()
-        if not current_user or current_user.username != 'admin':
+        if not current_user or not current_user.is_admin():
             flash('Acesso negado. Apenas administradores podem verificar pagamentos.', 'error')
             return redirect(url_for('index'))
             
@@ -1429,7 +1667,7 @@ def reject_payment(payment_id):
     """Manually reject a payment (admin function)"""
     try:
         current_user = get_current_user()
-        if not current_user or current_user.username != 'admin':
+        if not current_user or not current_user.is_admin():
             flash('Acesso negado. Apenas administradores podem rejeitar pagamentos.', 'error')
             return redirect(url_for('index'))
             
@@ -1949,7 +2187,7 @@ def update_all_tweets():
     """Buscar tweets de todos os protocolos (admin only)"""
     try:
         current_user = get_current_user()
-        if not current_user or current_user.username != 'admin':
+        if not current_user or not current_user.is_admin():
             flash('Access denied. Only administrators can update all tweets.', 'error')
             return redirect(url_for('index'))
         
@@ -2029,24 +2267,32 @@ def safe_string(value):
 @app.route('/twitter/search')
 @login_required
 def twitter_search():
-    """Página para buscar tweets dos protocolos"""
+    """🔒 SECURE: Página para buscar tweets dos protocolos do usuário autenticado"""
     try:
         current_user = get_current_user()
         if not current_user:
+            logging.warning("⚠️ SECURITY: Twitter search access attempt without authentication")
             return redirect(url_for('login'))
+        
+        # 🔒 SECURITY: Use secure function to get user protocols
+        all_user_protocols = get_user_protocols_secure(current_user)
         
         # Verificar se o usuário tem Twitter conectado
         has_twitter_connected = bool(current_user.twitter_access_token and current_user.twitter_id)
         
-        # Buscar todos os protocolos do usuário que têm Twitter configurado
-        protocols_with_twitter = Protocol.query.filter_by(user_id=current_user.id)\
-                                               .filter(Protocol.twitter.isnot(None))\
-                                               .filter(Protocol.twitter != '')\
-                                               .all()
+        # Filtrar protocolos que têm Twitter configurado
+        protocols_with_twitter = [p for p in all_user_protocols if p.twitter and p.twitter.strip()]
         
-        # Buscar tweets recentes de todos os protocolos
+        logging.info(f"✅ SECURITY: User {current_user.id} ({current_user.username}) accessing Twitter search - {len(protocols_with_twitter)} protocols with Twitter")
+        
+        # Buscar tweets recentes de todos os protocolos (apenas dos protocolos do usuário)
         recent_tweets = []
         for protocol in protocols_with_twitter:
+            # 🔒 SECURITY: Double-check protocol ownership before accessing tweets
+            if protocol.user_id != current_user.id:
+                logging.error(f"🚨 CRITICAL SECURITY ISSUE: Protocol {protocol.id} ownership mismatch in twitter_search")
+                continue
+                
             tweets = twitter_service.get_protocol_tweets(protocol.id, limit=3)
             for tweet in tweets:
                 tweet['protocol_name'] = protocol.name
@@ -2057,31 +2303,38 @@ def twitter_search():
         recent_tweets.sort(key=lambda x: x['created_at'], reverse=True)
         
         return render_template('twitter_search.html', 
-                             protocols=protocols_with_twitter,
+                             protocols_with_twitter=protocols_with_twitter,
                              recent_tweets=recent_tweets[:10],  # Mostrar apenas os 10 mais recentes
                              has_twitter_connected=has_twitter_connected,
                              current_user=current_user)
         
     except Exception as e:
-        logging.error(f"Erro na página de busca Twitter: {e}")
+        logging.error(f"Erro na página de busca Twitter para usuário {current_user.id if current_user else 'None'}: {e}")
         flash('Erro ao carregar página de busca de tweets.', 'error')
         return redirect(url_for('index'))
 
 @app.route('/twitter/search/<int:protocol_id>', methods=['POST'])
 @login_required
 def search_protocol_tweets(protocol_id):
-    """Buscar tweets de um protocolo específico"""
+    """🔒 SECURE: Buscar tweets de um protocolo específico do usuário autenticado"""
     try:
         current_user = get_current_user()
-        protocol = Protocol.query.filter_by(id=protocol_id, user_id=current_user.id).first()
+        if not current_user:
+            logging.warning(f"⚠️ SECURITY: Protocol tweet search attempt without authentication - Protocol ID: {protocol_id}")
+            return redirect(url_for('login'))
+        
+        # 🔒 SECURITY: Use secure protocol ownership verification
+        protocol = verify_protocol_ownership(protocol_id, current_user)
         
         if not protocol:
-            flash('Protocol not found.', 'error')
+            flash('Protocol not found or access denied.', 'error')
             return redirect(url_for('twitter_search'))
         
         if not protocol.twitter:
             flash('This protocol does not have Twitter configured.', 'error')
             return redirect(url_for('twitter_search'))
+        
+        logging.info(f"✅ SECURITY: User {current_user.id} ({current_user.username}) searching tweets for protocol {protocol_id} ({protocol.name})")
         
         # Usar o serviço simples do Twitter
         result = twitter_service.search_protocol_tweets(protocol_id)
@@ -2090,16 +2343,18 @@ def search_protocol_tweets(protocol_id):
             tweets_count = result.get('tweets_saved', 0)
             if tweets_count > 0:
                 flash(f'✅ {tweets_count} new tweets found for {protocol.name}!', 'success')
+                logging.info(f"✅ SECURITY: {tweets_count} tweets found for protocol {protocol_id} by user {current_user.id}")
             else:
                 flash(f'✅ Search completed for {protocol.name}! No new tweets found.', 'info')
         else:
             error_msg = result.get('error', 'Erro desconhecido')
             flash(f'❌ {error_msg}', 'error')
+            logging.warning(f"⚠️ Tweet search error for protocol {protocol_id} by user {current_user.id}: {error_msg}")
         
         return redirect(url_for('twitter_search'))
         
     except Exception as e:
-        logging.error(f"Erro ao buscar tweets: {e}")
+        logging.error(f"Erro ao buscar tweets do protocolo {protocol_id} para usuário {current_user.id if current_user else 'None'}: {e}")
         flash('Error searching for tweets.', 'error')
         return redirect(url_for('twitter_search'))
 
@@ -2767,6 +3022,24 @@ def set_language_route(language):
     
     # Redirecionar para a página anterior ou para home
     return redirect(request.referrer or url_for('index'))
+
+def log_security_event(event_type, user_id, message, extra_data=None):
+    """
+    🔒 SECURITY LOGGING: Log critical security events for audit trail
+    """
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    log_entry = f"[{timestamp}] SECURITY_{event_type.upper()}: User {user_id} - {message}"
+    
+    if extra_data:
+        log_entry += f" | Data: {extra_data}"
+    
+    # Log to different levels based on event type
+    if event_type in ['CRITICAL', 'UNAUTHORIZED_ACCESS', 'DATA_BREACH']:
+        logging.error(log_entry)
+    elif event_type in ['WARNING', 'SUSPICIOUS']:
+        logging.warning(log_entry)
+    else:
+        logging.info(log_entry)
 
 if __name__ == '__main__':
     print("🚀 Iniciando aplicação Flask com integração MCP Twitter...")

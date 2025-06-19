@@ -69,22 +69,150 @@
                         </div>
                     </div>
 
+
+
+                    <!-- Premium Upgrade Highlight -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            {% if not current_user.is_premium %}
+                            <div class="card border-warning bg-gradient premium-highlight">
+                                <div class="card-body text-center">
+                                    <div class="premium-icon mb-3">
+                                        <i class="fas fa-crown fa-3x text-warning"></i>
+                                    </div>
+                                    <h4 class="card-title text-warning mb-3">Upgrade to Premium</h4>
+                                    <p class="card-text mb-4">
+                                        Unlock unlimited protocols, advanced analytics, and premium features!
+                                    </p>
+                                    <div class="row text-center mb-4">
+                                        <div class="col-4">
+                                            <div class="premium-feature">
+                                                <i class="fas fa-infinity fa-2x text-warning mb-2"></i>
+                                                <small class="d-block">Unlimited<br>Protocols</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="premium-feature">
+                                                <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                                                <small class="d-block">Advanced<br>Analytics</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="premium-feature">
+                                                <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                                                <small class="d-block">Premium<br>Support</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="{{ url_for('upgrade_page') }}" class="btn btn-warning btn-lg px-5">
+                                        <i class="fas fa-crown me-2"></i>Upgrade Now
+                                    </a>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="card border-success bg-gradient premium-active">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-crown fa-2x text-warning mb-3"></i>
+                                    <h5 class="card-title text-success mb-2">Premium Active</h5>
+                                    <p class="card-text text-muted">
+                                        {% if current_user.premium_expires_at %}
+                                            Premium expires: {{ current_user.premium_expires_at.strftime('%B %d, %Y') }}
+                                        {% else %}
+                                            Lifetime Premium Active
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Account Settings (Collapsible) -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <button class="btn btn-link text-decoration-none p-0 w-100 text-start" 
+                                                type="button" data-bs-toggle="collapse" 
+                                                data-bs-target="#accountSettings" 
+                                                aria-expanded="false" 
+                                                aria-controls="accountSettings">
+                                            <i class="fas fa-cog me-2"></i>Account Settings
+                                            <i class="fas fa-chevron-down float-end mt-1"></i>
+                                        </button>
+                                    </h6>
+                                </div>
+                                <div class="collapse" id="accountSettings">
+                                    <div class="card-body account-settings">
+                                        <!-- Edit Email Form -->
+                                        <div class="mb-4">
+                                            <h6 class="card-title">Email Address</h6>
+                                            <form method="POST" action="{{ url_for('update_email') }}" class="mb-0">
+                                                <div class="input-group">
+                                                    <input type="email" class="form-control" name="email" 
+                                                           value="{{ current_user.email or '' }}" 
+                                                           placeholder="Enter your email address">
+                                                    <button class="btn btn-outline-primary" type="submit">
+                                                        <i class="fas fa-save me-1"></i>Save Email
+                                                    </button>
+                                                </div>
+                                                <small class="form-text text-muted">
+                                                    {% if current_user.email %}
+                                                        Current email: {{ current_user.email }}
+                                                    {% else %}
+                                                        No email registered
+                                                    {% endif %}
+                                                </small>
+                                            </form>
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Change Password Form -->
+                                        <div class="mb-0">
+                                            <h6 class="card-title">Change Password</h6>
+                                            <form method="POST" action="{{ url_for('change_password') }}">
+                                                <div class="mb-3">
+                                                    <label for="current_password" class="form-label">Current Password</label>
+                                                    <input type="password" class="form-control" id="current_password" 
+                                                           name="current_password" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="new_password" class="form-label">New Password</label>
+                                                    <input type="password" class="form-control" id="new_password" 
+                                                           name="new_password" required minlength="6">
+                                                    <small class="form-text text-muted">Minimum 6 characters</small>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                                    <input type="password" class="form-control" id="confirm_password" 
+                                                           name="confirm_password" required minlength="6">
+                                                </div>
+                                                <button type="submit" class="btn btn-warning">
+                                                    <i class="fas fa-key me-1"></i>Change Password
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Quick Actions -->
                     <div class="row">
                         <div class="col-12">
-                            <h5>{{ translate('quick_actions') }}</h5>
+                            <h5>Quick Actions</h5>
                             <div class="d-grid gap-2 d-md-flex">
                                 <a href="{{ url_for('add_protocol') }}" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>{{ translate('add_protocol') }}
+                                    <i class="fas fa-plus me-2"></i>Add Protocol
                                 </a>
                                 <a href="{{ url_for('airdrop_calendar') }}" class="btn btn-outline-primary">
-                                    <i class="fas fa-calendar-alt me-2"></i>{{ translate('calendar') }}
+                                    <i class="fas fa-calendar-alt me-2"></i>Calendar
                                 </a>
                                 <a href="{{ url_for('analytics_dashboard') }}" class="btn btn-outline-info">
-                                    <i class="fas fa-chart-bar me-2"></i>{{ translate('analytics') }}
-                                </a>
-                                <a href="{{ url_for('upgrade_page') }}" class="btn btn-warning">
-                                    <i class="fas fa-crown me-2"></i>{{ translate('upgrade_premium') }}
+                                    <i class="fas fa-chart-bar me-2"></i>Analytics
                                 </a>
                             </div>
                         </div>
@@ -95,4 +223,82 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validação do formulário de senha
+    const passwordForm = document.querySelector('form[action="{{ url_for("change_password") }}"]');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('New password and confirmation do not match.');
+                return false;
+            }
+            
+            if (newPassword.length < 6) {
+                e.preventDefault();
+                alert('New password must be at least 6 characters long.');
+                return false;
+            }
+        });
+        
+        // Validação em tempo real
+        const confirmPasswordField = document.getElementById('confirm_password');
+        const newPasswordField = document.getElementById('new_password');
+        
+        function validatePasswords() {
+            const newPassword = newPasswordField.value;
+            const confirmPassword = confirmPasswordField.value;
+            
+            if (confirmPassword && newPassword !== confirmPassword) {
+                confirmPasswordField.setCustomValidity('Passwords do not match');
+                confirmPasswordField.classList.add('is-invalid');
+            } else {
+                confirmPasswordField.setCustomValidity('');
+                confirmPasswordField.classList.remove('is-invalid');
+            }
+        }
+        
+        newPasswordField.addEventListener('input', validatePasswords);
+        confirmPasswordField.addEventListener('input', validatePasswords);
+    }
+    
+    // Validação do email
+    const emailForm = document.querySelector('form[action="{{ url_for("update_email") }}"]');
+    if (emailForm) {
+        emailForm.addEventListener('submit', function(e) {
+            const emailInput = emailForm.querySelector('input[name="email"]');
+            const email = emailInput.value.trim();
+            
+            if (email && !isValidEmail(email)) {
+                e.preventDefault();
+                alert('Please enter a valid email address.');
+                emailInput.focus();
+                return false;
+            }
+        });
+    }
+    
+    // Animate chevron icon when collapsing/expanding
+    const accountSettingsButton = document.querySelector('[data-bs-target="#accountSettings"]');
+    if (accountSettingsButton) {
+        const accountSettingsCollapse = document.getElementById('accountSettings');
+        accountSettingsCollapse.addEventListener('show.bs.collapse', function() {
+            accountSettingsButton.setAttribute('aria-expanded', 'true');
+        });
+        accountSettingsCollapse.addEventListener('hide.bs.collapse', function() {
+            accountSettingsButton.setAttribute('aria-expanded', 'false');
+        });
+    }
+    
+    function isValidEmail(email) {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
+});
+</script>
 {% endblock %} 
