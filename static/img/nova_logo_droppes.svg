@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dropGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#357ABD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E5C8A;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Gota d'água -->
+  <path d="M25 45 C25 50, 30 55, 35 55 C40 55, 45 50, 45 45 C45 35, 35 15, 35 15 C35 15, 25 35, 25 45 Z" 
+        fill="url(#dropGradient)" 
+        stroke="#2E5C8A" 
+        stroke-width="1"/>
+  
+  <!-- Brilho na gota -->
+  <ellipse cx="32" cy="35" rx="3" ry="6" fill="#87CEEB" opacity="0.6"/>
+  
+  <!-- Texto "Droppes" -->
+  <text x="60" y="38" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#2E5C8A">
+    Droppes
+  </text>
+  
+  <!-- Pequenas gotas decorativas -->
+  <circle cx="15" cy="25" r="2" fill="#4A90E2" opacity="0.7"/>
+  <circle cx="20" cy="20" r="1.5" fill="#357ABD" opacity="0.8"/>
+  <circle cx="10" cy="30" r="1" fill="#87CEEB" opacity="0.9"/>
+</svg> 
