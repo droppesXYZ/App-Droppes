@@ -29,7 +29,7 @@ except Exception as e:
         <h1>❌ Erro de Import</h1>
         <p><strong>Erro:</strong> {str(e)}</p>
         <p><strong>Traceback:</strong> {traceback.format_exc()}</p>
-        <p><strong>Environment:</strong> {'Vercel' if os.getenv('VERCEL') else 'Local'}</p>
+        <p><strong>Environment:</strong> {'Render' if os.getenv('RENDER') else 'Local'}</p>
         <p><strong>Python Path:</strong> {sys.path[0]}</p>
         <a href="/test">Teste de Rota</a>
         """
