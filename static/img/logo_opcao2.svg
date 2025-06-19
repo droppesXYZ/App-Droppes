@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="techGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5b73e8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Hexágono moderno -->
+  <polygon points="30,10 45,18 45,34 30,42 15,34 15,18" 
+           fill="url(#techGradient)" 
+           stroke="none"/>
+  
+  <!-- Letra "D" no hexágono -->
+  <text x="30" y="32" font-family="'Roboto', sans-serif" font-size="18" font-weight="700" 
+        fill="white" text-anchor="middle" dominant-baseline="middle">D</text>
+  
+  <!-- Texto "ROPPES" -->
+  <text x="60" y="32" font-family="'Roboto', sans-serif" font-size="26" font-weight="300" 
+        fill="#2c3e50" dominant-baseline="middle">ROPPES</text>
+  
+  <!-- Linha decorativa -->
+  <rect x="60" y="38" width="80" height="2" fill="#00d4ff" opacity="0.6"/>
+</svg> 

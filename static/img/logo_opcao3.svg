@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cleanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Quadrado arredondado -->
+  <rect x="5" y="15" width="30" height="30" rx="8" ry="8" 
+        fill="url(#cleanGradient)"/>
+  
+  <!-- Letra "D" minimalista -->
+  <path d="M12 25 L12 35 L18 35 C21 35, 23 33, 23 30 C23 27, 21 25, 18 25 Z M14 27 L18 27 C19 27, 21 27.5, 21 30 C21 32.5, 19 33, 18 33 L14 33 Z" 
+        fill="white"/>
+  
+  <!-- Texto "droppes" em lowercase -->
+  <text x="45" y="36" font-family="'Inter', sans-serif" font-size="22" font-weight="500" 
+        fill="#1a202c">droppes</text>
+  
+  <!-- Três pontos decorativos -->
+  <circle cx="155" cy="28" r="2" fill="#667eea"/>
+  <circle cx="165" cy="28" r="2" fill="#667eea" opacity="0.7"/>
+  <circle cx="175" cy="28" r="2" fill="#667eea" opacity="0.4"/>
+</svg> 
