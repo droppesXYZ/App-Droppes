@@ -6,15 +6,30 @@ from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
 from authlib.integrations.flask_client import OAuth
 from models import db, User, Protocol, Investment, Task, Airdrop, Tweet, Payment, InvestmentType, TaskStatus, ProtocolStatus, AirdropStatus, AirdropType, PaymentStatus, SubscriptionPlan
-from simple_twitter import twitter_service
-
-# Carregar variáveis de ambiente do arquivo .env se existir
+# Carregar variáveis de ambiente do arquivo .env se existir (apenas localmente)
 try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    # python-dotenv não está instalado, usar variáveis de ambiente do sistema
+    # Só tenta carregar .env se não estivermos no Vercel
+    if not os.getenv('VERCEL'):
+        from dotenv import load_dotenv
+        load_dotenv()
+except (ImportError, UnicodeDecodeError, Exception) as e:
+    # Ignora erros de .env - usa variáveis de ambiente do sistema
+    print(f"⚠️ Aviso: Não foi possível carregar .env ({e}), usando variáveis de ambiente do sistema")
     pass
+
+# Import do serviço Twitter com fallback
+try:
+    from simple_twitter import twitter_service
+    print("✅ Serviço Twitter importado com sucesso!")
+except ImportError as e:
+    print(f"⚠️ Aviso: Não foi possível importar simple_twitter ({e}), criando fallback")
+    # Cria um serviço twitter simples como fallback
+    class TwitterServiceFallback:
+        def search_tweets_by_username(self, username, count=3):
+            return []
+        def is_configured(self):
+            return False
+    twitter_service = TwitterServiceFallback()
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
