@@ -29,8 +29,8 @@ except Exception as e:
     def test():
         return "<h1>✅ Rota de teste funcionando no Vercel!</h1>"
 
-# Exportar app para Vercel
-def handler(request, context):
+# Exportar para Vercel (nova sintaxe)
+def handler(request):
     return app
 
 # Para execução local/teste
