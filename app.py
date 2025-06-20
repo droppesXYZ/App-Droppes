@@ -503,6 +503,25 @@ def setup_database():
     """Setup database connection with automatic fallback to SQLite"""
     database_url = os.environ.get("DATABASE_URL")
     
+    # No Vercel, usar Supabase obrigatoriamente
+    if os.getenv('VERCEL'):
+        if not database_url:
+            # URL do Supabase para produção
+            database_url = "postgresql://postgres.ejyxvigvakzmqebmcuiw:PjmdV3ZlrY1MV6Z3@aws-0-sa-east-1.pooler.supabase.com:5432/postgres"
+        
+        print("🚀 VERCEL: Usando Supabase obrigatoriamente")
+        app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+            "pool_recycle": 300,
+            "pool_pre_ping": True,
+            "connect_args": {
+                "connect_timeout": 10,
+                "application_name": "droppes_vercel"
+            }
+        }
+        return database_url
+    
+    # Para desenvolvimento local, manter fallback
     if not database_url:
         # Default to Supabase connection
         database_url = "postgresql://postgres.ejyxvigvakzmqebmcuiw:PjmdV3ZlrY1MV6Z3@aws-0-sa-east-1.pooler.supabase.com:5432/postgres"
