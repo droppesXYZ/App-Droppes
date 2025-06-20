@@ -11,9 +11,6 @@ try:
     from app import app
     print("✅ App importado com sucesso no Vercel!")
     
-    # Exportar app para Vercel
-    application = app
-    
 except Exception as e:
     print(f"❌ Erro ao importar app: {e}")
     from flask import Flask
@@ -31,12 +28,11 @@ except Exception as e:
     @app.route('/test')
     def test():
         return "<h1>✅ Rota de teste funcionando no Vercel!</h1>"
-    
-    application = app
 
-# Handler para Vercel (serverless)
+# Exportar app para Vercel
 def handler(request, context):
-    return application
+    return app
 
+# Para execução local/teste
 if __name__ == "__main__":
-    application.run(debug=True) 
+    app.run(debug=True) 

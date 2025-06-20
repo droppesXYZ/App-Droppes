@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/index.py": {
-      "runtime": "python3.11"
+      "runtime": "python3.9"
     }
   },
   "routes": [
@@ -11,7 +11,7 @@
     }
   ],
   "env": {
-    "PYTHON_VERSION": "3.11",
-    "DATABASE_URL": "postgresql://postgres.ejyxvigvakzmqebmcuiw:PjmdV3ZlrY1MV6Z3@aws-0-sa-east-1.pooler.supabase.com:5432/postgres"
+    "DATABASE_URL": "postgresql://postgres.ejyxvigvakzmqebmcuiw:PjmdV3ZlrY1MV6Z3@aws-0-sa-east-1.pooler.supabase.com:5432/postgres",
+    "VERCEL": "1"
   }
 } 
