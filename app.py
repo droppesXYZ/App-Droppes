@@ -2,7 +2,7 @@ import os
 import logging
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, g
-from functools import wraps
+from functools import wraps, lru_cache
 from werkzeug.security import check_password_hash, generate_password_hash
 from authlib.integrations.flask_client import OAuth
 from models import db, User, Protocol, Investment, Task, Airdrop, Tweet, Payment, InvestmentType, TaskStatus, ProtocolStatus, AirdropStatus, AirdropType, PaymentStatus, SubscriptionPlan
